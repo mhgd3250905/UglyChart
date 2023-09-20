@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="color_main">#2698c7</color>
+    <color name="color_highlight_gray">#BB727272</color>
+    <color name="color_grid_line">#55AAAAAA</color>
+    <color name="color_chart_new">#63d644</color>
+</resources>
