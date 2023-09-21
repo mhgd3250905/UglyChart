@@ -5,12 +5,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 
 import com.bboyuglyk.chart_sdk.BaseAxis;
+import com.bboyuglyk.chart_sdk.ChartDataKeyMap;
+import com.bboyuglyk.chart_sdk.Entry;
 import com.bboyuglyk.chart_sdk.ILabelFormatter;
 import com.bboyuglyk.chart_sdk.MChart;
+import com.bboyuglyk.mchart.new_dataset.LineDataSet;
 
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
+import java.util.LinkedList;
 
 public class MainActivity extends AppCompatActivity {
     private MChart chart;
@@ -22,11 +23,26 @@ public class MainActivity extends AppCompatActivity {
         chart = findViewById(R.id.chart);
 
         initChart();
+        initData();
+    }
+
+    private void initData() {
+        LinkedList<Entry> lineEnries = new LinkedList<>();
+        for (int i = 0; i < 720; i++) {
+            float y = (float) (100*Math.sin(Math.PI*i/100)+200);
+            lineEnries.add(new Entry(i * 2, y));
+        }
+        LineDataSet linDataSet = new LineDataSet(MainActivity.this, ChartDataKeyMap.SG_GLUCOSE,lineEnries);
+        chart.addDataSet(linDataSet);
     }
 
     private void initChart() {
+        //设置数据集合绘制优先级
         chart.setPriorityHelper(new MPriorityHelper());
-
+        //设置纵横网格是否显示
+        chart.setGridVisibility(true, false);
+        //设置横纵坐标是否显示
+        chart.setLabelVisibility(true, false);
 
         BaseAxis xAxis = new BaseAxis();
         xAxis.setMin(0);
@@ -35,12 +51,6 @@ public class MainActivity extends AppCompatActivity {
         xAxis.setiLabelFormatter(new ILabelFormatter() {
             @Override
             public String getLabelFormat(int value, int min, int max) {
-//                Calendar calendar = GregorianCalendar.getInstance();
-//                calendar.setTime(new Date());
-//                Date zeroHour = MTDateUtils.getZeroHour(calendar).getTime();
-//                Date time = MTDateUtils.dateByAddingTimeInterval(zeroHour, value * MTDateUtils.MINUTE_IN_MILLIS);
-//
-//                return simpleDateFormat.format(time);
                 return String.format("%02d:%02d", value / 60, value % 60);
             }
         });
@@ -51,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
         yAxis.setMin(27);
         yAxis.setMidCount(7);
         yAxis.setMax(440);
-        yAxis.setLabelArrs(new int[]{50,  150, 210, 250, 300, 310, 400, 440});
+        yAxis.setLabelArrs(new int[]{50, 100, 150, 200, 250, 300, 350, 400, 440});
 
         yAxis.setiLabelFormatter(new ILabelFormatter() {
             @Override
