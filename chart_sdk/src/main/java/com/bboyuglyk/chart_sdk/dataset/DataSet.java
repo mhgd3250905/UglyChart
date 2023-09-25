@@ -3,6 +3,7 @@ package com.bboyuglyk.chart_sdk.dataset;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.util.Log;
 
 import androidx.core.content.ContextCompat;
 
@@ -10,11 +11,14 @@ import androidx.core.content.ContextCompat;
 import com.bboyuglyk.chart_sdk.DataType;
 import com.bboyuglyk.chart_sdk.Entry;
 import com.bboyuglyk.chart_sdk.IEntryDrafter;
+import com.bboyuglyk.chart_sdk.PXY;
 import com.bboyuglyk.chart_sdk.R;
+import com.bboyuglyk.chart_sdk.ViewportInfo;
 
 import java.util.LinkedList;
 
 public abstract class DataSet implements IEntryDrafter {
+    private static final String TAG = "DataSet";
     //tip 上下文
     protected Context context;
     //tip tag区分
@@ -36,20 +40,45 @@ public abstract class DataSet implements IEntryDrafter {
         this.context = context;
     }
 
-//    //tip 获取优先级
-//    public abstract int getPriority();
 
-    public DataSet(Context context,String tag, DataType type, LinkedList<Entry> entries) {
+    public DataSet(Context context, String tag, DataType type) {
+        this.tag = tag;
+        this.context = context;
+        this.type = type;
+    }
+
+    public DataSet(Context context, String tag, DataType type, LinkedList<Entry> entries) {
+        switch (type) {
+            case SinglePoint:
+                break;
+            case DoublePoint:
+                if (entries.size() % 2 != 0) {
+                    Log.e(TAG, "datrset DoubleLineSet entries size must %2 ==0");
+                    assert false;
+                }
+                break;
+            case TriplePoint:
+                if (entries.size() % 3 != 0) {
+                    Log.e(TAG, "datrset DoubleLineSet entries size must %3 ==0");
+                    assert false;
+                }
+                break;
+            case QuatraPoint:
+                if (entries.size() % 2 != 0) {
+                    Log.e(TAG, "datrset DoubleLineSet entries size must %4 ==0");
+                    assert false;
+                }
+                break;
+        }
         this.tag = tag;
         this.context = context;
         this.type = type;
         this.entries = (LinkedList<Entry>) entries.clone();
         for (int i = 0; i < this.entries.size(); i++) {
-            entries.get(i).setTag(tag);
-            entries.get(i).setDataType(type);
+            this.entries.get(i).setTag(tag);
+            this.entries.get(i).setDataType(type);
         }
     }
-
 
 
     public String getTag() {
@@ -138,12 +167,29 @@ public abstract class DataSet implements IEntryDrafter {
     }
 
     @Override
-    public void drawRangeBar(Canvas canvas, float x, float y, float left, float top, float right, float bottom,float range){
+    public void drawRangeBar(Canvas canvas, float x, float y, float left, float top, float right, float bottom, float range) {
 
     }
 
+    @Override
+    public void drawSingleEntry(Canvas canvas, PXY p, ViewportInfo viewportInfo) {
 
+    }
 
+    @Override
+    public void drawDoubleEntry(Canvas canvas, PXY p1, PXY p2, ViewportInfo viewportInfo) {
+
+    }
+
+    @Override
+    public void drawTripleEntry(Canvas canvas, PXY p1, PXY p2, PXY p3, ViewportInfo viewportInfo) {
+
+    }
+
+    @Override
+    public void drawQuatraEntry(Canvas canvas, PXY p1, PXY p2, PXY p3, PXY p4, ViewportInfo viewportInfo) {
+
+    }
 
     public void setY2(boolean y2) {
         isY2 = y2;
@@ -153,7 +199,7 @@ public abstract class DataSet implements IEntryDrafter {
         return this.isY2;
     }
 
-    public  int getHighlightBgColor(){
+    public int getHighlightBgColor() {
         return ContextCompat.getColor(context, R.color.color_main);
     }
 }

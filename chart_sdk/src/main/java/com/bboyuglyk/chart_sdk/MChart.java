@@ -3,10 +3,6 @@ package com.bboyuglyk.chart_sdk;
 
 import static com.bboyuglyk.chart_sdk.DataType.bar;
 import static com.bboyuglyk.chart_sdk.DataType.bitmap;
-import static com.bboyuglyk.chart_sdk.DataType.line;
-import static com.bboyuglyk.chart_sdk.DataType.line_fill;
-import static com.bboyuglyk.chart_sdk.DataType.line_fill2;
-import static com.bboyuglyk.chart_sdk.DataType.line_rect;
 import static com.bboyuglyk.chart_sdk.DataType.range_bar;
 
 import android.content.Context;
@@ -119,7 +115,7 @@ public class MChart extends View {
         this.fullClickEnable = fullClickEnable;
     }
 
-    public void setShowGridVisibility(boolean showGridHorizontal, boolean showGridVertical) {
+    public void setGridVisibility(boolean showGridHorizontal, boolean showGridVertical) {
         this.showGridHorizontal = showGridHorizontal;
         this.showGridVertical = showGridVertical;
 //        if (!isWatch) {
@@ -128,7 +124,7 @@ public class MChart extends View {
 //        }
     }
 
-    public void setShowLabelVisibility(boolean showLabelHorizontal, boolean showLabelVertical) {
+    public void setLabelVisibility(boolean showLabelHorizontal, boolean showLabelVertical) {
         this.showLabelHorizontal = showLabelHorizontal;
         this.showLabelVertical = showLabelVertical;
     }
@@ -241,6 +237,11 @@ public class MChart extends View {
      */
     private PriorityHelper priorityHelper = new PriorityHelper();
 
+    /**
+     * 设置数据集合优先级
+     *
+     * @param priorityHelper
+     */
     public void setPriorityHelper(PriorityHelper priorityHelper) {
         this.priorityHelper = priorityHelper;
     }
@@ -945,7 +946,7 @@ public class MChart extends View {
 
         canvas.drawColor(bgColor);
 
-
+        //notice 计算图表参数
         if (width == 0 || height == 0) {
             width = getWidth();
             height = getHeight();
@@ -977,57 +978,11 @@ public class MChart extends View {
 
         frame.set(0 + leftMargin, 0 + topMargin, width - rightMargin, height - bottomMargin);
 
-
+        //notice 绘制边框
         canvas.drawRect(frame, lPaint);
 
 
-        x1 = 0;
-        y1 = 0;
-        x2 = 0;
-        y2 = 0;
-        //notice 绘制x轴label 起点和终点
-        if (tempXAxis.getiLabelFormatter() != null) {
-
-            labelStr = tempXAxis.getiLabelFormatter().getLabelFormat(tempXAxis.getMin(), tempXAxis.getMin(), tempXAxis.getMax());
-            tPaint.getTextBounds(labelStr, 0, labelStr.length(), labelRect);
-            labelRectHeight = labelRect.height();
-            labelRectWidth = labelRect.width();
-            canvas.drawText(labelStr, left, bottom + labelRectHeight + 10, tPaint);
-
-
-            labelStr = tempXAxis.getiLabelFormatter().getLabelFormat(tempXAxis.getMax(), tempXAxis.getMin(), tempXAxis.getMax());
-            tPaint.getTextBounds(labelStr, 0, labelStr.length(), labelRect);
-            labelRectHeight = labelRect.height();
-            labelRectWidth = labelRect.width();
-            canvas.drawText(labelStr, right - labelRectWidth, bottom + labelRectHeight + 10, tPaint);
-        }
-
-        //notice 绘制横向网格
-        if (showGridHorizontal) {
-            for (int i = 1; i < tempXAxis.getMidCount() + 1; i++) {
-                x1 = left + i * xLabelGap;
-                y1 = top;
-                x2 = x1;
-                y2 = bottom;
-                canvas.drawLine(x1, y1, x2, y2, gridPaint);
-            }
-        }
-
-        //notice 绘制横向网格label
-        if (showLabelHorizontal) {
-            for (int i = 1; i < tempXAxis.getMidCount() + 1; i++) {
-                x1 = left + i * xLabelGap;
-                y1 = top;
-                x2 = x1;
-                y2 = bottom;
-                labelValue = tempXAxis.getMin() + i * maxXCountGap;
-                labelStr = tempXAxis.getiLabelFormatter().getLabelFormat(labelValue, tempXAxis.getMin(), tempXAxis.getMax());
-                tPaint.getTextBounds(labelStr, 0, labelStr.length(), labelRect);
-                labelRectHeight = labelRect.height();
-                labelRectWidth = labelRect.width();
-                canvas.drawText(labelStr, x1 - labelRectWidth / 2, bottom + labelRectHeight + 10, tPaint);
-            }
-        }
+        drawableHorizontalElement(canvas);
 
         x1 = 0;
         y1 = 0;
@@ -1040,7 +995,6 @@ public class MChart extends View {
          * notice 否则就按照分割数进行分割
          */
         if (yAxis.getLabelArrs() == null || yAxis.getLabelArrs().length == 0) {
-
             //notice 绘制y轴label
             //notice 绘制Y轴分割线
             if (showGridVertical) {
@@ -1128,13 +1082,13 @@ public class MChart extends View {
                     tPaint.getTextBounds(labelStr, 0, labelStr.length(), labelRect);
                     labelRectHeight = labelRect.height();
                     labelRectWidth = labelRect.width();
-                    canvas.drawText(labelStr, right  + 10, bottom - labelRectHeight / 2, tPaint);
+                    canvas.drawText(labelStr, right + 10, bottom - labelRectHeight / 2, tPaint);
 
                     labelStr = y2Axis.getiLabelFormatter().getLabelFormat(y2Axis.getMax(), -1, -1);
                     tPaint.getTextBounds(labelStr, 0, labelStr.length(), labelRect);
                     labelRectHeight = labelRect.height();
                     labelRectWidth = labelRect.width();
-                    canvas.drawText(labelStr, right  + 10, top + labelRectHeight, tPaint);
+                    canvas.drawText(labelStr, right + 10, top + labelRectHeight, tPaint);
                 }
 
                 for (int i = 1; i < y2Axis.getMidCount() + 1; i++) {
@@ -1154,17 +1108,6 @@ public class MChart extends View {
             }
         } else {
             //notice 绘制y轴label
-
-//            if (showGridVertical) {
-//                for (int i = 0; i < yAxis.getLabelArrs().length; i++) {
-//                    x1 = left;
-//                    y1 = bottom - realHeight * (yAxis.getLabelArrs()[i] - yAxis.getMin()) / (yAxis.getMax() - yAxis.getMin());
-//                    x2 = right;
-//                    y2 = y1;
-//                    canvas.drawLine(x1, y1, x2, y2, gridPaint);
-//                }
-//            }
-
             if (showLabelVertical) {
                 for (int i = 0; i < y2Axis.getLabelArrs().length; i++) {
                     x1 = left;
@@ -1195,238 +1138,23 @@ public class MChart extends View {
             while (dataSetIterator.hasNext()) {
                 nextDataSet = dataSetIterator.next();
                 type = nextDataSet.getValue().getType();
-                if (type == line) {
-                    if (!nextDataSet.getValue().getEntries().isEmpty()) {
-                        index = 0;
-                        for (int i = 0; i < nextDataSet.getValue().getEntries().size(); i++) {
-
-                            x = nextDataSet.getValue().getEntries().get(i).getX();
-                            y = nextDataSet.getValue().getEntries().get(i).getY();
-
-                            if (i != nextDataSet.getValue().getEntries().size() - 1) {
-                                nextX = nextDataSet.getValue().getEntries().get(i + 1).getX();
-                                if (x < tempXAxis.getMin() && nextX < tempXAxis.getMin()) {
-                                    continue;
-                                }
-                            }
-
-                            if (i != 0) {
-                                periousX = nextDataSet.getValue().getEntries().get(i - 1).getX();
-                                if (x > tempXAxis.getMax() && periousX > tempXAxis.getMax()) {
-                                    continue;
-                                }
-                            }
-
-                            pX = left + (x - tempXAxis.getMin()) * realWidth / (tempXAxis.getMax() - tempXAxis.getMin());
-                            if (!nextDataSet.getValue().isY2()) {
-                                pY = bottom - (y - yAxis.getMin()) * realHeight / (yAxis.getMax() - yAxis.getMin());
-                            } else {
-                                pY = bottom - (y - y2Axis.getMin()) * realHeight / (y2Axis.getMax() - y2Axis.getMin());
-                            }
-
-
-                            if (index == 0) {
-                                lastLinePx = pX;
-                                lastLinePy = pY;
-                                index++;
-                                continue;
-                            }
-
-                            if (nextDataSet.getValue().getEntryDrafter() != null)
-                                nextDataSet.getValue().getEntryDrafter().drawLineEntry(canvas, lastLinePx, lastLinePy, pX, pY, left, top, right, bottom);
-
-
-                            lastLinePx = pX;
-                            lastLinePy = pY;
-
-                            index++;
-                        }
-                    }
-                } else if (type == line_fill || type == line_fill2) {
-                    if (!nextDataSet.getValue().getEntries().isEmpty()) {
-                        index = 0;
-
-                        for (int i = 0; i < nextDataSet.getValue().getEntries().size(); i++) {
-
-                            x = nextDataSet.getValue().getEntries().get(i).getX();
-                            y = nextDataSet.getValue().getEntries().get(i).getY();
-
-                            if (i != nextDataSet.getValue().getEntries().size() - 1) {
-                                nextX = nextDataSet.getValue().getEntries().get(i + 1).getX();
-                                if (x < tempXAxis.getMin() && nextX < tempXAxis.getMin()) {
-                                    continue;
-                                }
-                            }
-
-                            if (i != 0) {
-                                periousX = nextDataSet.getValue().getEntries().get(i - 1).getX();
-                                if (x > tempXAxis.getMax() && periousX > tempXAxis.getMax()) {
-                                    continue;
-                                }
-                            }
-
-                            pX = left + (x - tempXAxis.getMin()) * realWidth / (tempXAxis.getMax() - tempXAxis.getMin());
-                            if (!nextDataSet.getValue().isY2()) {
-                                pY = bottom - (y - yAxis.getMin()) * realHeight / (yAxis.getMax() - yAxis.getMin());
-                            } else {
-                                pY = bottom - (y - y2Axis.getMin()) * realHeight / (y2Axis.getMax() - y2Axis.getMin());
-                            }
-
-                            if (index == 0 && i % 2 == 1) {
-                                continue;
-                            }
-
-                            if (index % 2 == 0) {
-                                firstFillLinePX = pX;
-                                firstFillLinePY = pY;
-                                index++;
-                                continue;
-                            } else if (index % 1 == 0) {
-                                secondFillLinePX = pX;
-                                secondFillLinePY = pY;
-                                if (nextDataSet.getValue().getEntryDrafter() != null)
-                                    nextDataSet.getValue().getEntryDrafter().drawRectEntry(canvas, firstFillLinePX, secondFillLinePY, secondFillLinePX, bottom, left, top, right, bottom);
-                                index++;
-                                continue;
-                            }
-                        }
-
-//                    canvas.drawRect(lastLinePx,lastLinePy,firstFillLinePX,firstFillLinePY,nextDataSet.getValue().getPaint());
-                    }
-                } else if (type == line_rect) {
-                    if (!nextDataSet.getValue().getEntries().isEmpty()) {
-                        index = 0;
-                        for (int i = 0; i < nextDataSet.getValue().getEntries().size(); i++) {
-
-                            x = nextDataSet.getValue().getEntries().get(i).getX();
-                            y = nextDataSet.getValue().getEntries().get(i).getY();
-                            y_2 = nextDataSet.getValue().getEntries().get(i).getY2();
-
-                            if (i != nextDataSet.getValue().getEntries().size() - 1) {
-                                nextX = nextDataSet.getValue().getEntries().get(i + 1).getX();
-                                if (x < tempXAxis.getMin() && nextX < tempXAxis.getMin()) {
-                                    continue;
-                                }
-                            }
-
-                            if (i != 0) {
-                                periousX = nextDataSet.getValue().getEntries().get(i - 1).getX();
-                                if (x > tempXAxis.getMax() && periousX > tempXAxis.getMax()) {
-                                    continue;
-                                }
-                            }
-
-                            pX = left + (x - tempXAxis.getMin()) * realWidth / (tempXAxis.getMax() - tempXAxis.getMin());
-                            if (!nextDataSet.getValue().isY2()) {
-                                pY = bottom - (y - yAxis.getMin()) * realHeight / (yAxis.getMax() - yAxis.getMin());
-                                pY2 = bottom - (y_2 - yAxis.getMin()) * realHeight / (yAxis.getMax() - yAxis.getMin());
-                            } else {
-                                pY = bottom - (y - y2Axis.getMin()) * realHeight / (y2Axis.getMax() - y2Axis.getMin());
-                                pY2 = bottom - (y_2 - y2Axis.getMin()) * realHeight / (y2Axis.getMax() - y2Axis.getMin());
-                            }
-
-                            if (index == 0 && i % 2 == 1) {
-                                continue;
-                            }
-
-                            if (index % 2 == 0) {
-                                firstFillLinePX = pX;
-                                firstFillLinePY = pY;
-                                firstFillLinePY2 = pY2;
-                                index++;
-                                continue;
-                            } else if (index % 1 == 0) {
-                                secondFillLinePX = pX;
-                                secondFillLinePY = pY;
-                                secondFillLinePY2 = pY2;
-                                if (nextDataSet.getValue().getEntryDrafter() != null)
-                                    nextDataSet.getValue().getEntryDrafter().drawRectEntry(canvas, firstFillLinePX, secondFillLinePY, secondFillLinePX, secondFillLinePY2, left, top, right, bottom);
-                                index++;
-                                continue;
-                            }
-                        }
-
-//                    canvas.drawRect(lastLinePx,lastLinePy,firstFillLinePX,firstFillLinePY,nextDataSet.getValue().getPaint());
-                    }
-                } else if (type == bar || type == range_bar) {
-                    for (int i = 0; i < nextDataSet.getValue().getEntries().size(); i++) {
-                        if (nextDataSet.getValue().getEntries().get(i).getyValues() != null) {
-                            //notice 如果存在y数组，那么就要画组合矩形
-                            x = nextDataSet.getValue().getEntries().get(i).getX();
-                            y = nextDataSet.getValue().getEntries().get(i).getY();
-                            if (x < tempXAxis.getMin() || x > tempXAxis.getMax()) {
-                                continue;
-                            }
-                            //notice 计算最大矩形的坐标
-                            pX = left + (x - tempXAxis.getMin()) * realWidth / (tempXAxis.getMax() - tempXAxis.getMin());
-                            if (!nextDataSet.getValue().isY2()) {
-                                pY = bottom - (y - yAxis.getMin()) * realHeight / (yAxis.getMax() - yAxis.getMin());
-                            } else {
-                                pY = bottom - (y - y2Axis.getMin()) * realHeight / (y2Axis.getMax() - y2Axis.getMin());
-                            }
-
-
-                            midYs = new float[nextDataSet.getValue().getEntries().get(i).getyValues().length];
-                            lastBottom = bottom;
-                            for (int j = 0; j < nextDataSet.getValue().getEntries().get(i).getyValues().length; j++) {
-                                if (!nextDataSet.getValue().isY2()) {
-                                    lastBottom = lastBottom - (nextDataSet.getValue().getEntries().get(i).getyValues()[j] - yAxis.getMin()) * realHeight / (yAxis.getMax() - yAxis.getMin());
-                                } else {
-                                    lastBottom = lastBottom - (nextDataSet.getValue().getEntries().get(i).getyValues()[j] - y2Axis.getMin()) * realHeight / (y2Axis.getMax() - y2Axis.getMin());
-                                }
-                                midYs[j] = lastBottom;
-                            }
-
-
-                            if (nextDataSet.getValue().getEntryDrafter() != null)
-                                nextDataSet.getValue().getEntryDrafter().drawComposeRect(canvas, left, top, right, bottom, pX, pY, midYs);
-
-                        } else {
-                            x = nextDataSet.getValue().getEntries().get(i).getX();
-                            y = nextDataSet.getValue().getEntries().get(i).getY();
-                            if (x < tempXAxis.getMin() || x > tempXAxis.getMax()) {
-                                continue;
-                            }
-                            pX = left + (x - tempXAxis.getMin()) * realWidth / (tempXAxis.getMax() - tempXAxis.getMin());
-
-                            if (!nextDataSet.getValue().isY2()) {
-                                pY = bottom - (y - yAxis.getMin()) * realHeight / (yAxis.getMax() - yAxis.getMin());
-                            } else {
-                                pY = bottom - (y - y2Axis.getMin()) * realHeight / (y2Axis.getMax() - y2Axis.getMin());
-                            }
-
-
-                            if (nextDataSet.getValue().getEntries().get(i).getY2() != 0) {
-                                if (nextDataSet.getValue().getEntryDrafter() != null)
-                                    nextDataSet.getValue().getEntryDrafter().drawRangeBar(canvas, pX, pY, left, top, right, bottom, nextDataSet.getValue().getEntries().get(i).getY2() * realWidth / (tempXAxis.getMax() - tempXAxis.getMin()));
-                            } else {
-                                if (nextDataSet.getValue().getEntryDrafter() != null)
-                                    nextDataSet.getValue().getEntryDrafter().drawPointEntry(canvas, pX, pY, left, top, right, bottom);
-                            }
-                        }
-//                    canvas.drawCircle(pX, pY, 10f, lPaint);
-                    }
-                } else {
-                    for (int i = 0; i < nextDataSet.getValue().getEntries().size(); i++) {
-
-                        x = nextDataSet.getValue().getEntries().get(i).getX();
-                        y = nextDataSet.getValue().getEntries().get(i).getY();
-                        if (x < tempXAxis.getMin() || x > tempXAxis.getMax()) {
-                            continue;
-                        }
-                        pX = left + (x - tempXAxis.getMin()) * realWidth / (tempXAxis.getMax() - tempXAxis.getMin());
-                        if (!nextDataSet.getValue().isY2()) {
-                            pY = bottom - (y - yAxis.getMin()) * realHeight / (yAxis.getMax() - yAxis.getMin());
-                        } else {
-                            pY = bottom - (y - y2Axis.getMin()) * realHeight / (y2Axis.getMax() - y2Axis.getMin());
-                        }
-
-
-                        if (nextDataSet.getValue().getEntryDrafter() != null)
-                            nextDataSet.getValue().getEntryDrafter().drawPointEntry(canvas, pX, pY, left, top, right, bottom);
-//                    canvas.drawCircle(pX, pY, 10f, lPaint);
-                    }
+                switch (type) {
+                    case SinglePoint:
+                        drawSinglePoint(canvas);
+                        break;
+                    case DoublePoint:
+                        drawDoublePoint(canvas);
+                        break;
+                    case TriplePoint:
+                        drawTriplePoint(canvas);
+                        break;
+                    case QuatraPoint:
+                        drawQuatraPoint(canvas);
+                        break;
+                    default:
+                        drawSinglePoint(canvas);
                 }
+
             }
         }
 
@@ -1608,6 +1336,205 @@ public class MChart extends View {
                     }
 
                 }
+            }
+        }
+    }
+
+    private void drawSinglePoint(Canvas canvas) {
+        for (int i = 0; i < nextDataSet.getValue().getEntries().size(); i++) {
+
+            x = nextDataSet.getValue().getEntries().get(i).getX();
+            y = nextDataSet.getValue().getEntries().get(i).getY();
+            if (x < tempXAxis.getMin() || x > tempXAxis.getMax()) {
+                continue;
+            }
+            pX = left + (x - tempXAxis.getMin()) * realWidth / (tempXAxis.getMax() - tempXAxis.getMin());
+            if (!nextDataSet.getValue().isY2()) {
+                pY = bottom - (y - yAxis.getMin()) * realHeight / (yAxis.getMax() - yAxis.getMin());
+            } else {
+                pY = bottom - (y - y2Axis.getMin()) * realHeight / (y2Axis.getMax() - y2Axis.getMin());
+            }
+
+            if (nextDataSet.getValue().getEntryDrafter() != null)
+                nextDataSet.getValue().getEntryDrafter().drawSingleEntry(canvas, new PXY(pX, pY), new ViewportInfo(left, top, right, bottom));
+
+        }
+    }
+
+    private void drawDoublePoint(Canvas canvas) {
+        float x0, x1, y0, y1, pX0, pY0, pX1, pY1;
+        int size = 2;
+        for (int i = 0; i < nextDataSet.getValue().getEntries().size() - 1; i++) {
+//            if(i%size!=0) continue;
+            x0 = nextDataSet.getValue().getEntries().get(i).getX();
+            y0 = nextDataSet.getValue().getEntries().get(i).getY();
+
+            x1 = nextDataSet.getValue().getEntries().get(i + 1).getX();
+            y1 = nextDataSet.getValue().getEntries().get(i + 1).getY();
+            if (x0 < tempXAxis.getMin() && x1 < tempXAxis.getMin()) {
+                continue;
+            }
+            if (x0 > tempXAxis.getMax() && x1 > tempXAxis.getMax()) {
+                continue;
+            }
+            if (x0 < tempXAxis.getMin()) {
+                x0 = tempXAxis.getMin();
+            }
+            if (x1 > tempXAxis.getMax()) {
+                x1 = tempXAxis.getMax();
+            }
+
+
+            pX0 = left + (x0 - tempXAxis.getMin()) * realWidth / (tempXAxis.getMax() - tempXAxis.getMin());
+            pY0 = bottom - (y0 - yAxis.getMin()) * realHeight / (yAxis.getMax() - yAxis.getMin());
+            pX1 = left + (x1 - tempXAxis.getMin()) * realWidth / (tempXAxis.getMax() - tempXAxis.getMin());
+            pY1 = bottom - (y1 - yAxis.getMin()) * realHeight / (yAxis.getMax() - yAxis.getMin());
+
+            if (nextDataSet.getValue().getEntryDrafter() != null)
+                nextDataSet.getValue().getEntryDrafter().drawDoubleEntry(canvas, new PXY(pX0, pY0), new PXY(pX1, pY1), new ViewportInfo(left, top, right, bottom));
+
+        }
+    }
+
+    private void drawTriplePoint(Canvas canvas) {
+        float x0, x1, x2, y0, y1, y2, pX0, pY0, pX1, pY1, pX2, pY2;
+        int size = 3;
+        for (int i = 0; i < nextDataSet.getValue().getEntries().size() - 2; i++) {
+//            if(i%size!=0) continue;
+            x0 = nextDataSet.getValue().getEntries().get(i).getX();
+            y0 = nextDataSet.getValue().getEntries().get(i).getY();
+
+            x1 = nextDataSet.getValue().getEntries().get(i + 1).getX();
+            y1 = nextDataSet.getValue().getEntries().get(i + 1).getY();
+
+            x2 = nextDataSet.getValue().getEntries().get(i + 2).getX();
+            y2 = nextDataSet.getValue().getEntries().get(i + 2).getY();
+            if (x0 < tempXAxis.getMin() && x1 < tempXAxis.getMin() && x2 < tempXAxis.getMin()) {
+                continue;
+            }
+            if (x0 > tempXAxis.getMax() && x1 > tempXAxis.getMax() && x2 > tempXAxis.getMax()) {
+                continue;
+            }
+            if (x0 < tempXAxis.getMin()) {
+                x0 = tempXAxis.getMin();
+            }
+            if (x1 > tempXAxis.getMax()) {
+                x1 = tempXAxis.getMax();
+            }
+            if (x2 > tempXAxis.getMax()) {
+                x2 = tempXAxis.getMax();
+            }
+
+
+            pX0 = left + (x0 - tempXAxis.getMin()) * realWidth / (tempXAxis.getMax() - tempXAxis.getMin());
+            pY0 = bottom - (y0 - yAxis.getMin()) * realHeight / (yAxis.getMax() - yAxis.getMin());
+            pX1 = left + (x1 - tempXAxis.getMin()) * realWidth / (tempXAxis.getMax() - tempXAxis.getMin());
+            pY1 = bottom - (y1 - yAxis.getMin()) * realHeight / (yAxis.getMax() - yAxis.getMin());
+            pX2 = left + (x2 - tempXAxis.getMin()) * realWidth / (tempXAxis.getMax() - tempXAxis.getMin());
+            pY2 = bottom - (y2 - yAxis.getMin()) * realHeight / (yAxis.getMax() - yAxis.getMin());
+
+            if (nextDataSet.getValue().getEntryDrafter() != null)
+                nextDataSet.getValue().getEntryDrafter().drawTripleEntry(canvas, new PXY(pX0, pY0), new PXY(pX1, pY1),new PXY(pX2, pY2), new ViewportInfo(left, top, right, bottom));
+
+        }
+    }
+
+    private void drawQuatraPoint(Canvas canvas) {
+        float x0, x1, x2,x3, y0, y1, y2,y3, pX0, pY0, pX1, pY1, pX2, pY2, pX3, pY3;
+        int size = 3;
+        for (int i = 0; i < nextDataSet.getValue().getEntries().size() - 3; i++) {
+//            if(i%size!=0) continue;
+            x0 = nextDataSet.getValue().getEntries().get(i).getX();
+            y0 = nextDataSet.getValue().getEntries().get(i).getY();
+
+            x1 = nextDataSet.getValue().getEntries().get(i + 1).getX();
+            y1 = nextDataSet.getValue().getEntries().get(i + 1).getY();
+
+            x2 = nextDataSet.getValue().getEntries().get(i + 2).getX();
+            y2 = nextDataSet.getValue().getEntries().get(i + 2).getY();
+
+            x3 = nextDataSet.getValue().getEntries().get(i + 3).getX();
+            y3 = nextDataSet.getValue().getEntries().get(i + 3).getY();
+            if (x0 < tempXAxis.getMin() && x1 < tempXAxis.getMin() && x2 < tempXAxis.getMin()&& x3 < tempXAxis.getMin()) {
+                continue;
+            }
+            if (x0 > tempXAxis.getMax() && x1 > tempXAxis.getMax() && x2 > tempXAxis.getMax()&& x3 > tempXAxis.getMax()) {
+                continue;
+            }
+            if (x0 < tempXAxis.getMin()) {
+                x0 = tempXAxis.getMin();
+            }
+            if (x1 > tempXAxis.getMax()) {
+                x1 = tempXAxis.getMax();
+            }
+            if (x2 > tempXAxis.getMax()) {
+                x2 = tempXAxis.getMax();
+            }
+            if (x3 > tempXAxis.getMax()) {
+                x3 = tempXAxis.getMax();
+            }
+
+
+            pX0 = left + (x0 - tempXAxis.getMin()) * realWidth / (tempXAxis.getMax() - tempXAxis.getMin());
+            pY0 = bottom - (y0 - yAxis.getMin()) * realHeight / (yAxis.getMax() - yAxis.getMin());
+            pX1 = left + (x1 - tempXAxis.getMin()) * realWidth / (tempXAxis.getMax() - tempXAxis.getMin());
+            pY1 = bottom - (y1 - yAxis.getMin()) * realHeight / (yAxis.getMax() - yAxis.getMin());
+            pX2 = left + (x2 - tempXAxis.getMin()) * realWidth / (tempXAxis.getMax() - tempXAxis.getMin());
+            pY2 = bottom - (y2 - yAxis.getMin()) * realHeight / (yAxis.getMax() - yAxis.getMin());
+            pX3 = left + (x3 - tempXAxis.getMin()) * realWidth / (tempXAxis.getMax() - tempXAxis.getMin());
+            pY3 = bottom - (y3 - yAxis.getMin()) * realHeight / (yAxis.getMax() - yAxis.getMin());
+
+            if (nextDataSet.getValue().getEntryDrafter() != null)
+                nextDataSet.getValue().getEntryDrafter().drawQuatraEntry(canvas, new PXY(pX0, pY0), new PXY(pX1, pY1),new PXY(pX2, pY2),new PXY(pX3, pY3), new ViewportInfo(left, top, right, bottom));
+
+        }
+    }
+
+    private void drawableHorizontalElement(Canvas canvas) {
+        //notice 绘制横向网格
+        if (showGridHorizontal) {
+            for (int i = 1; i < tempXAxis.getMidCount() + 1; i++) {
+                x1 = left + i * xLabelGap;
+                y1 = top;
+                x2 = x1;
+                y2 = bottom;
+                canvas.drawLine(x1, y1, x2, y2, gridPaint);
+            }
+        }
+
+        //notice 绘制横向网格label
+        if (showLabelHorizontal) {
+            x1 = 0;
+            y1 = 0;
+            x2 = 0;
+            y2 = 0;
+            //notice 绘制x轴label 起点和终点
+            if (tempXAxis.getiLabelFormatter() != null) {
+
+                labelStr = tempXAxis.getiLabelFormatter().getLabelFormat(tempXAxis.getMin(), tempXAxis.getMin(), tempXAxis.getMax());
+                tPaint.getTextBounds(labelStr, 0, labelStr.length(), labelRect);
+                labelRectHeight = labelRect.height();
+                labelRectWidth = labelRect.width();
+                canvas.drawText(labelStr, left, bottom + labelRectHeight + 10, tPaint);
+
+                labelStr = tempXAxis.getiLabelFormatter().getLabelFormat(tempXAxis.getMax(), tempXAxis.getMin(), tempXAxis.getMax());
+                tPaint.getTextBounds(labelStr, 0, labelStr.length(), labelRect);
+                labelRectHeight = labelRect.height();
+                labelRectWidth = labelRect.width();
+                canvas.drawText(labelStr, right - labelRectWidth, bottom + labelRectHeight + 10, tPaint);
+            }
+
+            for (int i = 1; i < tempXAxis.getMidCount() + 1; i++) {
+                x1 = left + i * xLabelGap;
+                y1 = top;
+                x2 = x1;
+                y2 = bottom;
+                labelValue = tempXAxis.getMin() + i * maxXCountGap;
+                labelStr = tempXAxis.getiLabelFormatter().getLabelFormat(labelValue, tempXAxis.getMin(), tempXAxis.getMax());
+                tPaint.getTextBounds(labelStr, 0, labelStr.length(), labelRect);
+                labelRectHeight = labelRect.height();
+                labelRectWidth = labelRect.width();
+                canvas.drawText(labelStr, x1 - labelRectWidth / 2, bottom + labelRectHeight + 10, tPaint);
             }
         }
     }

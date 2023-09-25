@@ -22,7 +22,7 @@ public class BaseAxis {
     }
 
     /**
-     * 设置中间分隔个数
+     * 设置中间分隔个数:优先级低于 LabelArrs
      * @param midCount
      */
     public void setMidCount(int midCount) {

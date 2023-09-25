@@ -9,16 +9,15 @@ import com.bboyuglyk.chart_sdk.DataType;
 import com.bboyuglyk.chart_sdk.Entry;
 import com.bboyuglyk.chart_sdk.PXY;
 import com.bboyuglyk.chart_sdk.ViewportInfo;
-import com.bboyuglyk.chart_sdk.dataset.DataSet;
 import com.bboyuglyk.chart_sdk.dataset.SingleDataSet;
 
 import java.util.LinkedList;
 
-public class LineDataSet extends SingleDataSet {
+public class CurceLineDataSet extends SingleDataSet {
     private float radius = 5f;
 
-    public LineDataSet(Context context, String tag, LinkedList<Entry> entries) {
-        super(context, tag, DataType.SinglePoint, entries);
+    public CurceLineDataSet(Context context, String tag, LinkedList<Entry> entries) {
+        super(context, tag, DataType.CurveLine, entries);
         init();
     }
 

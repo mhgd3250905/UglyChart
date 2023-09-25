@@ -1,24 +1,33 @@
 package com.bboyuglyk.mchart.new_dataset;
 
+import static com.bboyuglyk.mchart.BezierUtils.calculatePointCoordinate;
+
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Path;
+import android.graphics.PointF;
+import android.util.Log;
+
+import androidx.annotation.IntRange;
 
 import com.bboyuglyk.chart_sdk.DataType;
 import com.bboyuglyk.chart_sdk.Entry;
 import com.bboyuglyk.chart_sdk.PXY;
 import com.bboyuglyk.chart_sdk.ViewportInfo;
-import com.bboyuglyk.chart_sdk.dataset.DataSet;
 import com.bboyuglyk.chart_sdk.dataset.SingleDataSet;
+import com.bboyuglyk.mchart.BezierUtils;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 
-public class LineDataSet extends SingleDataSet {
+public class DoubleLineSet extends SingleDataSet {
     private float radius = 5f;
 
-    public LineDataSet(Context context, String tag, LinkedList<Entry> entries) {
-        super(context, tag, DataType.SinglePoint, entries);
+    public DoubleLineSet(Context context, String tag, LinkedList<Entry> entries) {
+        super(context, tag, DataType.DoublePoint, entries);
         init();
     }
 
@@ -27,9 +36,9 @@ public class LineDataSet extends SingleDataSet {
         setEntryDrafter(this);
         Paint paint = new Paint();
         paint.setAntiAlias(true);//设置抗锯齿
-        paint.setStyle(Paint.Style.FILL);//实心
-        paint.setStrokeWidth(2);//线条粗细
-        paint.setColor(Color.BLACK);//线条粗细
+        paint.setStyle(Paint.Style.STROKE);//实心
+        paint.setStrokeWidth(4);//线条粗细
+        paint.setColor(Color.BLUE);//线条粗细
         setPaint(paint);
         setShowMarker(true);
     }
@@ -43,15 +52,18 @@ public class LineDataSet extends SingleDataSet {
         this.radius = radius;
     }
 
-    @Override
-    public void drawPointEntry(Canvas canvas, float x, float y, float left, float top, float right, float bottom) {
-        canvas.drawCircle(x, y, radius, paint);
-    }
 
     @Override
-    public void drawSingleEntry(Canvas canvas, PXY p, ViewportInfo viewportInfo) {
-        canvas.drawCircle(p.getX(), p.getY(), radius, paint);
+    public void drawDoubleEntry(Canvas canvas, PXY p1, PXY p2, ViewportInfo viewportInfo) {
+        Path path=new Path();
+        path.moveTo(p1.x,p1.y);
+        path.lineTo(p2.x,p2.y);
+        canvas.drawPath(path,paint);
     }
+
+
+
+
 
     @Override
     public float getFoundNearRange() {

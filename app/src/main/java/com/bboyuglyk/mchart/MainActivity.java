@@ -2,38 +2,73 @@ package com.bboyuglyk.mchart;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.graphics.PointF;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
 
 import com.bboyuglyk.chart_sdk.BaseAxis;
 import com.bboyuglyk.chart_sdk.ChartDataKeyMap;
 import com.bboyuglyk.chart_sdk.Entry;
 import com.bboyuglyk.chart_sdk.ILabelFormatter;
 import com.bboyuglyk.chart_sdk.MChart;
+import com.bboyuglyk.chart_sdk.PXY;
+import com.bboyuglyk.mchart.new_dataset.Double2LineSet;
+import com.bboyuglyk.mchart.new_dataset.DoubleLineSet;
 import com.bboyuglyk.mchart.new_dataset.LineDataSet;
+import com.bboyuglyk.mchart.new_dataset.QuatraLineSet;
+import com.bboyuglyk.mchart.new_dataset.TripleLineSet;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
+    private static final String TAG = "MainActivity";
     private MChart chart;
+    private Button btnTest;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         chart = findViewById(R.id.chart);
+        btnTest = findViewById(R.id.btn_test);
+
+        btnTest.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                initData();
+            }
+        });
 
         initChart();
         initData();
     }
 
     private void initData() {
-        LinkedList<Entry> lineEnries = new LinkedList<>();
-        for (int i = 0; i < 720; i++) {
-            float y = (float) (100*Math.sin(Math.PI*i/100)+200);
-            lineEnries.add(new Entry(i * 2, y));
+        LinkedList<Entry> entries = new LinkedList<>();
+        for (int i = 0; i < 10; i++) {
+            entries.add(new Entry(i*200, (float) (Math.random()*400)));
         }
-        LineDataSet linDataSet = new LineDataSet(MainActivity.this, ChartDataKeyMap.SG_GLUCOSE,lineEnries);
+
+        Entry first = entries.get(0);
+        Entry last = entries.get(entries.size()-1);
+        entries.add(0,first);
+        entries.add(entries.size()-1,last);
+
+        QuatraLineSet quatraLineSet = new QuatraLineSet(MainActivity.this, ChartDataKeyMap.SG_GLUCOSE_LOW,entries);
+        chart.addDataSet(quatraLineSet);
+
+        DoubleLineSet linDataSet = new DoubleLineSet(MainActivity.this, ChartDataKeyMap.SG_GLUCOSE,entries);
         chart.addDataSet(linDataSet);
+
+
+        chart.invalidate();
+//        Double2LineSet linDataSet3 = new Double2LineSet(MainActivity.this, ChartDataKeyMap.SG_GLUCOSE_HIGH,doubleLineEnries);
+//        chart.addDataSet(linDataSet3);
     }
 
     private void initChart() {
@@ -42,16 +77,16 @@ public class MainActivity extends AppCompatActivity {
         //设置纵横网格是否显示
         chart.setGridVisibility(true, false);
         //设置横纵坐标是否显示
-        chart.setLabelVisibility(true, false);
+        chart.setLabelVisibility(true, true);
 
         BaseAxis xAxis = new BaseAxis();
         xAxis.setMin(0);
-        xAxis.setMax(1440);
-        xAxis.setMidCount(2);
+        xAxis.setMax(2000);
+        xAxis.setMidCount(3);
         xAxis.setiLabelFormatter(new ILabelFormatter() {
             @Override
             public String getLabelFormat(int value, int min, int max) {
-                return String.format("%02d:%02d", value / 60, value % 60);
+                return String.format("%d", value);
             }
         });
 
