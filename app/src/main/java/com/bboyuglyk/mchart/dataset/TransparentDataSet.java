@@ -15,7 +15,7 @@ public class TransparentDataSet extends DataSet {
     private float radius = 5f;
 
     public TransparentDataSet(Context context, String tag, LinkedList<Entry> entries) {
-        super(context,tag, DataType.point, entries);
+        super(context,tag, DataType.point,entries, entries);
         init();
     }
 

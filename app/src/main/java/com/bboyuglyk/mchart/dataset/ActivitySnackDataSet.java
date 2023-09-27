@@ -24,7 +24,7 @@ public class ActivitySnackDataSet extends DataSet {
     private Bitmap bitmap;
 
     public ActivitySnackDataSet(Context context, String tag, LinkedList<Entry> entries) {
-        super(context, tag, DataType.bitmap, entries);
+        super(context, tag, DataType.bitmap,entries, entries);
         this.context = context;
         init();
     }

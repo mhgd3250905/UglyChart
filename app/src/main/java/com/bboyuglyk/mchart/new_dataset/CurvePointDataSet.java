@@ -13,11 +13,11 @@ import com.bboyuglyk.chart_sdk.dataset.SingleDataSet;
 
 import java.util.LinkedList;
 
-public class CurceLineDataSet extends SingleDataSet {
+public class CurvePointDataSet extends SingleDataSet {
     private float radius = 5f;
 
-    public CurceLineDataSet(Context context, String tag, LinkedList<Entry> entries) {
-        super(context, tag, DataType.CurveLine, entries);
+    public CurvePointDataSet(Context context, String tag, LinkedList<Entry> entries) {
+        super(context, tag, DataType.CurveSingle, entries);
         init();
     }
 

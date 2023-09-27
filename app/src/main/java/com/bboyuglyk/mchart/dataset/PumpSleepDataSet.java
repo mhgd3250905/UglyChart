@@ -13,7 +13,7 @@ import java.util.LinkedList;
 
 public class PumpSleepDataSet extends DataSet {
     public PumpSleepDataSet(Context context, String tag, LinkedList<Entry> entries) {
-        super(context,tag, DataType.line_rect, entries);
+        super(context,tag, DataType.line_rect,entries, entries);
         init();
     }
 

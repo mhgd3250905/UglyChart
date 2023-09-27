@@ -15,7 +15,7 @@ public class PumpStopDataSet extends DataSet {
     private float radius = 20f;
 
     public PumpStopDataSet(Context context, String tag, LinkedList<Entry> entries) {
-        super(context,tag, DataType.point, entries);
+        super(context,tag, DataType.point,entries, entries);
         init();
     }
 

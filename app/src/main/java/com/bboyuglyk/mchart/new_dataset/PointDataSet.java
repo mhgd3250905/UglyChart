@@ -9,15 +9,14 @@ import com.bboyuglyk.chart_sdk.DataType;
 import com.bboyuglyk.chart_sdk.Entry;
 import com.bboyuglyk.chart_sdk.PXY;
 import com.bboyuglyk.chart_sdk.ViewportInfo;
-import com.bboyuglyk.chart_sdk.dataset.DataSet;
 import com.bboyuglyk.chart_sdk.dataset.SingleDataSet;
 
 import java.util.LinkedList;
 
-public class LineDataSet extends SingleDataSet {
+public class PointDataSet extends SingleDataSet {
     private float radius = 5f;
 
-    public LineDataSet(Context context, String tag, LinkedList<Entry> entries) {
+    public PointDataSet(Context context, String tag, LinkedList<Entry> entries) {
         super(context, tag, DataType.SinglePoint, entries);
         init();
     }
@@ -28,7 +27,7 @@ public class LineDataSet extends SingleDataSet {
         Paint paint = new Paint();
         paint.setAntiAlias(true);//设置抗锯齿
         paint.setStyle(Paint.Style.FILL);//实心
-        paint.setStrokeWidth(2);//线条粗细
+        paint.setStrokeWidth(4);//线条粗细
         paint.setColor(Color.BLACK);//线条粗细
         setPaint(paint);
         setShowMarker(true);

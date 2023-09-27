@@ -15,7 +15,7 @@ public class WarningLineDataSet extends DataSet {
 
 
     public WarningLineDataSet(Context context, String tag, LinkedList<Entry> entries) {
-        super(context,tag, DataType.line, entries);
+        super(context,tag, DataType.line,entries, entries);
         init();
     }
 

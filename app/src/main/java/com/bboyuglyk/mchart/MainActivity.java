@@ -2,33 +2,27 @@ package com.bboyuglyk.mchart;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.graphics.PointF;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.TextView;
 
 import com.bboyuglyk.chart_sdk.BaseAxis;
 import com.bboyuglyk.chart_sdk.ChartDataKeyMap;
 import com.bboyuglyk.chart_sdk.Entry;
 import com.bboyuglyk.chart_sdk.ILabelFormatter;
 import com.bboyuglyk.chart_sdk.MChart;
-import com.bboyuglyk.chart_sdk.PXY;
-import com.bboyuglyk.mchart.new_dataset.Double2LineSet;
+import com.bboyuglyk.mchart.new_dataset.CurveLineDataSet;
+import com.bboyuglyk.mchart.new_dataset.CurvePointDataSet;
 import com.bboyuglyk.mchart.new_dataset.DoubleLineSet;
-import com.bboyuglyk.mchart.new_dataset.LineDataSet;
-import com.bboyuglyk.mchart.new_dataset.QuatraLineSet;
-import com.bboyuglyk.mchart.new_dataset.TripleLineSet;
+import com.bboyuglyk.mchart.new_dataset.PointDataSet;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
     private MChart chart;
     private Button btnTest;
+    private Button btnTest2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,11 +30,18 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         chart = findViewById(R.id.chart);
         btnTest = findViewById(R.id.btn_test);
+        btnTest2 = findViewById(R.id.btn_test_2);
 
         btnTest.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 initData();
+            }
+        });
+        btnTest2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                initData2();
             }
         });
 
@@ -51,24 +52,47 @@ public class MainActivity extends AppCompatActivity {
     private void initData() {
         LinkedList<Entry> entries = new LinkedList<>();
         for (int i = 0; i < 10; i++) {
-            entries.add(new Entry(i*200, (float) (Math.random()*400)));
+            entries.add(new Entry(i * 200, 200 + (float) (Math.random() * 200)));
         }
 
-        Entry first = entries.get(0);
-        Entry last = entries.get(entries.size()-1);
-        entries.add(0,first);
-        entries.add(entries.size()-1,last);
+//        Entry first = entries.get(0);
+//        Entry last = entries.get(entries.size()-1);
+//        entries.add(0,first);
+//        entries.add(entries.size()-1,last);
 
-        QuatraLineSet quatraLineSet = new QuatraLineSet(MainActivity.this, ChartDataKeyMap.SG_GLUCOSE_LOW,entries);
-        chart.addDataSet(quatraLineSet);
+//        PointDataSet curvePointDataSet = new PointDataSet(MainActivity.this, ChartDataKeyMap.SG_GLUCOSE_LOW,entries);
+//        chart.addDataSet(curvePointDataSet);
 
-        DoubleLineSet linDataSet = new DoubleLineSet(MainActivity.this, ChartDataKeyMap.SG_GLUCOSE,entries);
-        chart.addDataSet(linDataSet);
+//        CurvePointDataSet curvePointDataSet = new CurvePointDataSet(MainActivity.this, ChartDataKeyMap.SG_GLUCOSE_LOW,entries);
+//        chart.addDataSet(curvePointDataSet);
 
+        CurveLineDataSet linDataSet = new CurveLineDataSet(MainActivity.this, ChartDataKeyMap.SG_GLUCOSE, entries);
+        chart.addAnimDataSet(linDataSet);
 
         chart.invalidate();
-//        Double2LineSet linDataSet3 = new Double2LineSet(MainActivity.this, ChartDataKeyMap.SG_GLUCOSE_HIGH,doubleLineEnries);
-//        chart.addDataSet(linDataSet3);
+    }
+
+    private void initData2() {
+        LinkedList<Entry> entries = new LinkedList<>();
+        for (int i = 0; i < 20; i++) {
+            entries.add(new Entry(i * 100, 200 + (float) (Math.random() * 200)));
+        }
+
+//        Entry first = entries.get(0);
+//        Entry last = entries.get(entries.size()-1);
+//        entries.add(0,first);
+//        entries.add(entries.size()-1,last);
+
+//        PointDataSet curvePointDataSet = new PointDataSet(MainActivity.this, ChartDataKeyMap.SG_GLUCOSE_LOW,entries);
+//        chart.addDataSet(curvePointDataSet);
+
+//        CurvePointDataSet curvePointDataSet = new CurvePointDataSet(MainActivity.this, ChartDataKeyMap.SG_GLUCOSE_LOW,entries);
+//        chart.addDataSet(curvePointDataSet);
+
+        CurveLineDataSet linDataSet = new CurveLineDataSet(MainActivity.this, ChartDataKeyMap.SG_GLUCOSE, entries);
+        chart.addAnimDataSet(linDataSet);
+
+        chart.invalidate();
     }
 
     private void initChart() {

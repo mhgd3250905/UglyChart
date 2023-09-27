@@ -13,7 +13,7 @@ import java.util.LinkedList;
 
 public class AutoModeBolusDataSet extends DataSet {
     public AutoModeBolusDataSet(Context context, String tag, LinkedList<Entry> entries) {
-        super(context,tag, DataType.line_fill2, entries);
+        super(context,tag, DataType.line_fill2,entries, entries);
         init();
     }
 

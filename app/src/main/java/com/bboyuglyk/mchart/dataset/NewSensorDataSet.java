@@ -18,7 +18,7 @@ import java.util.LinkedList;
 public class NewSensorDataSet extends DataSet {
     private static final String TAG = "NewSensorDataSet";
     public NewSensorDataSet(Context context, String tag, LinkedList<Entry> entries) {
-        super(context,tag, DataType.bar, entries);
+        super(context,tag, DataType.bar,entries, entries);
         init();
     }
 

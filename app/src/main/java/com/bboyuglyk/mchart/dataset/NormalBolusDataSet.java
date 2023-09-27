@@ -16,7 +16,7 @@ public class NormalBolusDataSet extends DataSet {
     private float foundNearRange = 10f;
 
     public NormalBolusDataSet(Context context, String tag, LinkedList<Entry> entries) {
-        super(context,tag, DataType.bar, entries);
+        super(context,tag, DataType.bar,entries, entries);
         init();
     }
 

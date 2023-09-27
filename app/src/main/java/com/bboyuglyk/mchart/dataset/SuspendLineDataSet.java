@@ -15,7 +15,7 @@ import java.util.LinkedList;
 public class SuspendLineDataSet extends DataSet {
 
     public SuspendLineDataSet(Context context, String tag, LinkedList<Entry> entries) {
-        super(context,tag, DataType.line, entries);
+        super(context,tag, DataType.line,entries, entries);
         init();
     }
 

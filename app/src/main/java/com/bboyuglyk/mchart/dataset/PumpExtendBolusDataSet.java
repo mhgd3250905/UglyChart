@@ -24,7 +24,7 @@ public class PumpExtendBolusDataSet extends DataSet {
     private int i;
 
     public PumpExtendBolusDataSet(Context context, String tag, LinkedList<Entry> entries, int[] colors) {
-        super(context,tag, DataType.line_fill, entries);
+        super(context,tag, DataType.line_fill,entries, entries);
         this.colors = colors;
         if (entries != null && entries.size() > 0) {
             if (entries.getFirst().getyValues() != null) {
@@ -37,7 +37,7 @@ public class PumpExtendBolusDataSet extends DataSet {
     }
 
     public PumpExtendBolusDataSet(Context context,String tag, LinkedList<Entry> entries) {
-        super(context,tag, DataType.bar, entries);
+        super(context,tag, DataType.bar,entries, entries);
         init();
     }
 

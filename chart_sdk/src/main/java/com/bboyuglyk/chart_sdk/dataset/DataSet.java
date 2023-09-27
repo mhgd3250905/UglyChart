@@ -5,6 +5,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 
 
@@ -25,15 +26,17 @@ public abstract class DataSet implements IEntryDrafter {
     protected String tag;
     //tip 数据类型
     protected DataType type;
+    //tip 原始数据
+    protected LinkedList<Entry> baseEntries;
     //tip 传入的完整数据
     protected LinkedList<Entry> entries;
     //tip entry绘制
-    private IEntryDrafter entryDrafter;
+    protected IEntryDrafter entryDrafter;
     //tip 画笔
     protected Paint paint;
     //tip 是否可以显示到marker
-    private boolean showMarker;
-    private boolean isY2;
+    protected boolean showMarker;
+    protected boolean isY2;
 
 
     public DataSet(Context context) {
@@ -47,7 +50,7 @@ public abstract class DataSet implements IEntryDrafter {
         this.type = type;
     }
 
-    public DataSet(Context context, String tag, DataType type, LinkedList<Entry> entries) {
+    public DataSet(Context context, String tag, DataType type, LinkedList<Entry> baseEntries, LinkedList<Entry> entries) {
         switch (type) {
             case SinglePoint:
                 break;
@@ -73,6 +76,7 @@ public abstract class DataSet implements IEntryDrafter {
         this.tag = tag;
         this.context = context;
         this.type = type;
+        this.baseEntries = (LinkedList<Entry>) baseEntries.clone();
         this.entries = (LinkedList<Entry>) entries.clone();
         for (int i = 0; i < this.entries.size(); i++) {
             this.entries.get(i).setTag(tag);
@@ -106,6 +110,14 @@ public abstract class DataSet implements IEntryDrafter {
         this.entryDrafter = entryDrafter;
     }
 
+    public LinkedList<Entry> getBaseEntries() {
+        return baseEntries;
+    }
+
+    public void setBaseEntries(LinkedList<Entry> baseEntries) {
+        this.baseEntries = baseEntries;
+    }
+
     public LinkedList<Entry> getEntries() {
         return entries;
     }
@@ -113,7 +125,6 @@ public abstract class DataSet implements IEntryDrafter {
     public void setEntries(LinkedList<Entry> entries) {
         this.entries = entries;
     }
-
 
     public Paint getPaint() {
         return paint;
@@ -202,4 +213,5 @@ public abstract class DataSet implements IEntryDrafter {
     public int getHighlightBgColor() {
         return ContextCompat.getColor(context, R.color.color_main);
     }
+
 }

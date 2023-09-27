@@ -13,6 +13,12 @@
         android:layout_height="wrap_content"
         android:text="TEST"/>
 
+    <Button
+        android:id="@+id/btn_test_2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="TEST2"/>
+
     <com.bboyuglyk.chart_sdk.MChart
         android:id="@+id/chart"
         android:layout_width="match_parent"

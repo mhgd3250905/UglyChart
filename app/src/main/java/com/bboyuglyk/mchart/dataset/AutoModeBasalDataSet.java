@@ -13,7 +13,7 @@ import java.util.LinkedList;
 
 public class AutoModeBasalDataSet extends DataSet {
     public AutoModeBasalDataSet(Context context, String tag, LinkedList<Entry> entries) {
-        super(context,tag, DataType.line_fill, entries);
+        super(context,tag, DataType.line_fill,entries, entries);
         init();
     }
 

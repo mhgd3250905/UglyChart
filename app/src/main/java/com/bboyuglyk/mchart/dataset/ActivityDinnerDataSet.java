@@ -25,13 +25,13 @@ public class ActivityDinnerDataSet extends DataSet {
     @DrawableRes int iconRes;
 
     public ActivityDinnerDataSet(Context context, String tag, LinkedList<Entry> entries) {
-        super(context,tag, DataType.bitmap, entries);
+        super(context,tag, DataType.bitmap,entries, entries);
         this.context = context;
         init();
     }
 
     public ActivityDinnerDataSet(Context context, String tag, LinkedList<Entry> entries,int iconRes) {
-        super(context,tag, DataType.bitmap, entries);
+        super(context,tag, DataType.bitmap,entries, entries);
         this.context = context;
         this.iconRes=iconRes;
         init();

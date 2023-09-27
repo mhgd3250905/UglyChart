@@ -14,7 +14,7 @@ import java.util.LinkedList;
 
 public class PumpTempBasalDataSet extends DataSet {
     public PumpTempBasalDataSet(Context context, String tag, LinkedList<Entry> entries) {
-        super(context,tag, DataType.line, entries);
+        super(context,tag, DataType.line,entries, entries);
         init();
     }
 

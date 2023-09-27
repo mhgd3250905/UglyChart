@@ -1,6 +1,7 @@
 package com.bboyuglyk.chart_sdk;
 
 
+
 import static com.bboyuglyk.chart_sdk.DataType.bar;
 import static com.bboyuglyk.chart_sdk.DataType.bitmap;
 import static com.bboyuglyk.chart_sdk.DataType.range_bar;
@@ -27,8 +28,10 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.core.util.Pair;
 
+import com.bboyuglyk.chart_sdk.dataset.AnimDataSet;
 import com.bboyuglyk.chart_sdk.dataset.DataSet;
 import com.bboyuglyk.chart_sdk.dataset.DataSetBox;
+import com.bboyuglyk.chart_sdk.dataset.OnAnimDataChangeListener;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -41,7 +44,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 
-public class MChart extends View {
+public class MChart extends View implements OnAnimDataChangeListener {
     private static final String TAG = "MChart";
 
     private Paint lPaint;
@@ -278,6 +281,7 @@ public class MChart extends View {
         touchTargetTypes.add(bitmap);
         touchTargetTypes.add(bar);
         touchTargetTypes.add(range_bar);
+
 //        touchTargetTypes.add(line_rect);
 
         touchExceptTypes = new ArraySet<>();
@@ -401,6 +405,15 @@ public class MChart extends View {
      */
     public void addDataSet(DataSet dataSet) {
         dataSetBox.addDataSet(dataSet);
+    }
+
+    /**
+     * tip 添加数据
+     *
+     * @param dataSet
+     */
+    public void addAnimDataSet(AnimDataSet dataSet) {
+        dataSetBox.addAnimDataSet(dataSet);
     }
 
     private int dp2px(int value) {
@@ -1151,6 +1164,12 @@ public class MChart extends View {
                     case QuatraPoint:
                         drawQuatraPoint(canvas);
                         break;
+                    case CurveSingle:
+                        drawSinglePoint(canvas);
+                        break;
+                    case CurveDouble:
+                        drawDoublePoint(canvas);
+                        break;
                     default:
                         drawSinglePoint(canvas);
                 }
@@ -1551,6 +1570,7 @@ public class MChart extends View {
 
     public void setDataSetBox(DataSetBox dataSetBox) {
         this.dataSetBox = dataSetBox;
+        this.dataSetBox.setOnAnimDataChangeListener(this);
     }
 
     /**
@@ -1648,4 +1668,8 @@ public class MChart extends View {
         isShowSgChart = showSgChart;
     }
 
+    @Override
+    public void onAnimDataChanged() {
+        invalidate();
+    }
 }

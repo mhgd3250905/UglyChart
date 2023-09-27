@@ -14,7 +14,7 @@ import java.util.LinkedList;
 public class ExtendBolusDataSet extends DataSet {
 
     public ExtendBolusDataSet(Context context, String tag, LinkedList<Entry> entries) {
-        super(context,tag, DataType.range_bar, entries);
+        super(context,tag, DataType.range_bar,entries, entries);
         init();
     }
 

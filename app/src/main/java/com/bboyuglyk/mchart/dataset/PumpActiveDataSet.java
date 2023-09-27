@@ -18,7 +18,7 @@ import java.util.LinkedList;
 public class PumpActiveDataSet extends DataSet {
     private static final String TAG = "NewSensorDataSet";
     public PumpActiveDataSet(Context context, String tag, LinkedList<Entry> entries) {
-        super(context,tag, DataType.point, entries);
+        super(context,tag, DataType.point,entries, entries);
         init();
     }
 

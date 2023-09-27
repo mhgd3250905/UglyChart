@@ -4,10 +4,10 @@ package com.bboyuglyk.chart_sdk;
  * 图表视野信息
  */
 public class ViewportInfo {
-    private float left;
-    private float top;
-    private float right;
-    private float bottom;
+   public float left;
+   public float top;
+   public float right;
+   public float bottom;
 
     public ViewportInfo(float left, float top, float right, float bottom) {
         this.left = left;
