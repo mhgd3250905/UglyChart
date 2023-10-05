@@ -18,12 +18,16 @@ import java.util.LinkedList;
 
 public class CurveLineDataSet extends SingleDataSet {
     private float radius = 5f;
+    private int[] colors;
 
     public CurveLineDataSet(Context context, String tag, LinkedList<Entry> entries) {
         super(context, tag, DataType.CurveDouble, entries);
         init();
     }
 
+    public void setColors(int[] colors) {
+        this.colors = colors;
+    }
 
     private void init() {
         setEntryDrafter(this);
@@ -54,15 +58,13 @@ public class CurveLineDataSet extends SingleDataSet {
         path.lineTo(p1.x,viewportInfo.bottom);
         path.close();
 
-        int[] colors=new int[]{Color.YELLOW,Color.TRANSPARENT};
+        LinearGradient linearGradient = new LinearGradient(p1.x, viewportInfo.top, p1.x, viewportInfo.bottom, colors,
+                null,
+                Shader.TileMode.REPEAT);
+        paint.setShader(linearGradient);
 
-//        LinearGradient linearGradient = new LinearGradient(p1.x, viewportInfo.top, p1.x, viewportInfo.bottom, colors, null, Shader.TileMode.REPEAT);
-//        paint.setShader(linearGradient);
-////        canvas.drawRect(0, 0, 400, 400, mPaint);
-
-
-//        canvas.drawPath(path, paint);
-        canvas.drawLine(p1.getX(), p1.getY(),p2.getX(), p2.getY(), paint);
+        canvas.drawPath(path, paint);
+//        canvas.drawLine(p1.getX(), p1.getY(),p2.getX(), p2.getY(), paint);
     }
 
     @Override

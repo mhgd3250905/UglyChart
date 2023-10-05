@@ -1,32 +1,24 @@
 package com.bboyuglyk.mchart.new_dataset;
 
-import static com.bboyuglyk.mchart.BezierUtils.calculatePointCoordinate;
-
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.PointF;
-import android.util.Log;
-
-import androidx.annotation.IntRange;
 
 import com.bboyuglyk.chart_sdk.DataType;
 import com.bboyuglyk.chart_sdk.Entry;
 import com.bboyuglyk.chart_sdk.PXY;
 import com.bboyuglyk.chart_sdk.ViewportInfo;
 import com.bboyuglyk.chart_sdk.dataset.SingleDataSet;
-import com.bboyuglyk.mchart.BezierUtils;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.List;
 
-public class DoubleLineSet extends SingleDataSet {
+public class LineDataSet extends SingleDataSet {
     private float radius = 5f;
+    private int lineColor=Color.BLACK;
 
-    public DoubleLineSet(Context context, String tag, LinkedList<Entry> entries) {
+    public LineDataSet(Context context, String tag, LinkedList<Entry> entries) {
         super(context, tag, DataType.DoublePoint, entries);
         init();
     }
@@ -43,6 +35,10 @@ public class DoubleLineSet extends SingleDataSet {
         setShowMarker(true);
     }
 
+    public void setLineColor(int lineColor) {
+        this.lineColor = lineColor;
+        paint.setColor(lineColor);
+    }
 
     public float getRadius() {
         return radius;

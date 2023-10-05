@@ -5,23 +5,15 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:background="@color/chart_bg_dark"
     tools:context=".MainActivity">
 
     <Button
-        android:id="@+id/btn_test"
+        android:id="@+id/btn_line_chart"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="TEST"/>
+        android:text="LineChart"/>
 
-    <Button
-        android:id="@+id/btn_test_2"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="TEST2"/>
 
-    <com.bboyuglyk.chart_sdk.MChart
-        android:id="@+id/chart"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
 
 </LinearLayout>

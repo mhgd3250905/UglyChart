@@ -2,11 +2,13 @@ package com.bboyuglyk.chart_sdk.dataset;
 
 import android.animation.ValueAnimator;
 import android.util.Log;
+import android.view.animation.BounceInterpolator;
 
 import androidx.annotation.NonNull;
 
 import com.bboyuglyk.chart_sdk.BaseAxis;
 import com.bboyuglyk.chart_sdk.CurveUtils;
+import com.bboyuglyk.chart_sdk.DataType;
 import com.bboyuglyk.chart_sdk.Entry;
 
 import java.util.Comparator;
@@ -62,6 +64,7 @@ public class DataSetBox {
             dataSetMap.put(newDataSet.getTag(), newDataSet);
             return;
         }
+        DataType dataType = newDataSet.getType();
         // step: 对比数据内容 old->new
         int oldSize = oldDataSet.baseEntries.size();
         int newSize = newDataSet.baseEntries.size();
@@ -73,41 +76,53 @@ public class DataSetBox {
         animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(@NonNull ValueAnimator animation) {
-//                Log.d(TAG, "onAnimationUpdate: "+animation.getAnimatedValue());
+                Log.d(TAG, "onAnimationUpdate: "+animation.getAnimatedValue());
                 LinkedList<Entry> tempEntries = new LinkedList<>();
+                Entry oldEntry=null;
+                Entry newEntry=null;
+                float translationX;
+                float translationY;
+                float leftX;
+                float leftY;
+                Entry tempEntry=null;
                 for (int i = 0; i < moveSize; i++) {
-                    Entry oldEntry = oldDataSet.baseEntries.get(i);
-                    Entry newEntry = newDataSet.baseEntries.get(i);
-                    float translationX = newEntry.getX() - oldEntry.getX();
-                    float translationY = newEntry.getY() - oldEntry.getY();
-                    Entry tempEntry = new Entry(oldEntry.getX() + (float) (animation.getAnimatedValue()) * translationX,
+                    oldEntry = oldDataSet.baseEntries.get(i);
+                    newEntry = newDataSet.baseEntries.get(i);
+                    translationX = newEntry.getX() - oldEntry.getX();
+                    translationY = newEntry.getY() - oldEntry.getY();
+                    tempEntry = new Entry(oldEntry.getX() + (float) (animation.getAnimatedValue()) * translationX,
                             oldEntry.getY() + (float) (animation.getAnimatedValue()) * translationY);
 //                    Log.d(TAG, "onAnimationUpdate: "+tempEntry);
                     tempEntries.add(tempEntry);
                 }
                 // step: 如果是增多
                 if (moveSize < newSize) {
-                    float leftX = oldDataSet.baseEntries.get(moveSize - 1).getX();
-                    float leftY = oldDataSet.baseEntries.get(moveSize - 1).getY();
+                    leftX = oldDataSet.baseEntries.get(moveSize - 1).getX();
+                    leftY = oldDataSet.baseEntries.get(moveSize - 1).getY();
                     for (int i = moveSize; i < newSize; i++) {
-                        Entry newEntry = newDataSet.baseEntries.get(i);
-                        float translationX = newEntry.getX() - leftX;
-                        float translationY = newEntry.getY() - leftY;
-                        Entry tempEntry = new Entry(leftX + (float) (animation.getAnimatedValue()) * translationX
+                        newEntry = newDataSet.baseEntries.get(i);
+                        translationX = newEntry.getX() - leftX;
+                        translationY = newEntry.getY() - leftY;
+                        tempEntry = new Entry(leftX + (float) (animation.getAnimatedValue()) * translationX
                                 , leftY + (float) (animation.getAnimatedValue()) * translationY);
 //                    Log.d(TAG, "onAnimationUpdate: "+tempEntry);
                         tempEntries.add(tempEntry);
                     }
                 }
 
-                tempDataSet.setEntries(DataConverter.convertToCurve(tempEntries));
+                if(dataType==DataType.CurveSingle||dataType==DataType.CurveDouble) {
+                    tempDataSet.setEntries(DataConverter.convertToCurve(tempEntries));
+                }else{
+                    tempDataSet.setEntries(tempEntries);
+                }
                 dataSetMap.put(newDataSet.getTag(), tempDataSet);
                 if (onAnimDataChangeListener != null) {
                     onAnimDataChangeListener.onAnimDataChanged();
                 }
             }
         });
-        animator.setDuration(500);
+        animator.setInterpolator(new BounceInterpolator());
+        animator.setDuration(1000);
         animator.start();
 
     }

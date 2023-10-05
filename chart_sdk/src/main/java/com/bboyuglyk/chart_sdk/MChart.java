@@ -47,10 +47,13 @@ import java.util.concurrent.ConcurrentHashMap;
 public class MChart extends View implements OnAnimDataChangeListener {
     private static final String TAG = "MChart";
 
-    private Paint lPaint;
+    private Paint borderPaint;
     private Paint highLightPaint;
     private Paint gridPaint;
     private Paint tPaint;
+    private Paint xPaint;
+    private Paint y1Paint;
+    private Paint y2Paint;
     private Paint barTPaint;
     private Paint markerPaint;
     private TextPaint markerTPaint;
@@ -65,7 +68,7 @@ public class MChart extends View implements OnAnimDataChangeListener {
     private float topMargin = 20;
     private float bottomMargin = 50;
     private float leftMargin = 100;
-    private float rightMargin = 40;
+    private float rightMargin = 100;
     private float x1;
     private float y1;
     private float x2;
@@ -113,6 +116,25 @@ public class MChart extends View implements OnAnimDataChangeListener {
     private Rect labelRect = new Rect();
     private int labelRectHeight;
     private int labelRectWidth;
+    private int bgColor=Color.WHITE;
+    private int xLabelColor;
+    private int y1LabelColor;
+    private int y2LabelColor;
+
+    public void setBgColor(int bgColor) {
+        this.bgColor = bgColor;
+    }
+    private int borderColor=Color.GRAY;
+
+    public void setBorderColor(int borderColor) {
+        this.borderColor = borderColor;
+    }
+
+    private int gridColor=Color.GRAY;
+
+    public void setGridColor(int gridColor) {
+        this.gridColor = gridColor;
+    }
 
     public void setFullClickEnable(boolean fullClickEnable) {
         this.fullClickEnable = fullClickEnable;
@@ -130,6 +152,13 @@ public class MChart extends View implements OnAnimDataChangeListener {
     public void setLabelVisibility(boolean showLabelHorizontal, boolean showLabelVertical) {
         this.showLabelHorizontal = showLabelHorizontal;
         this.showLabelVertical = showLabelVertical;
+    }
+
+
+    public void setLabelColor(int xLabelColor, int y1LabelColor,int y2LabelColor) {
+        this.xLabelColor=xLabelColor;
+        this.y1LabelColor=y1LabelColor;
+        this.y2LabelColor=y2LabelColor;
     }
 
     public void setMargin(int left, int top, int rifght, int bottom) {
@@ -300,11 +329,11 @@ public class MChart extends View implements OnAnimDataChangeListener {
         markerFrame = new RectF();
 
         //notice 边框画笔
-        lPaint = new Paint();
-        lPaint.setAntiAlias(true);//设置抗锯齿
-        lPaint.setStyle(Paint.Style.STROKE);//实心
-        lPaint.setStrokeWidth(2);//线条粗细
-        lPaint.setColor(ContextCompat.getColor(getContext(), R.color.color_grid_line));//线条粗细
+        borderPaint = new Paint();
+        borderPaint.setAntiAlias(true);//设置抗锯齿
+        borderPaint.setStyle(Paint.Style.STROKE);//实心
+        borderPaint.setStrokeWidth(2);//线条粗细
+        borderPaint.setColor(ContextCompat.getColor(getContext(), R.color.color_grid_line));//线条粗细
 
         highLightPaint = new Paint();
         highLightPaint.setAntiAlias(true);//设置抗锯齿
@@ -326,6 +355,27 @@ public class MChart extends View implements OnAnimDataChangeListener {
         tPaint.setStrokeWidth(5);
         tPaint.setColor(Color.BLACK);
         tPaint.setTextSize(dp2px(10));
+
+        //notice 文字画笔
+        xPaint = new Paint();
+        xPaint.setAntiAlias(true);
+        xPaint.setStrokeWidth(5);
+        xPaint.setColor(Color.BLACK);
+        xPaint.setTextSize(dp2px(10));
+
+        //notice 文字画笔
+        y1Paint = new Paint();
+        y1Paint.setAntiAlias(true);
+        y1Paint.setStrokeWidth(5);
+        y1Paint.setColor(Color.BLACK);
+        y1Paint.setTextSize(dp2px(10));
+
+        //notice 文字画笔
+        y2Paint = new Paint();
+        y2Paint.setAntiAlias(true);
+        y2Paint.setStrokeWidth(5);
+        y2Paint.setColor(Color.BLACK);
+        y2Paint.setTextSize(dp2px(10));
 
         //notice 文字画笔
         barTPaint = new Paint();
@@ -955,7 +1005,6 @@ public class MChart extends View implements OnAnimDataChangeListener {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        int bgColor = style == STYLE_LIGHT ? Color.WHITE : Color.alpha(0x333);
 
         canvas.drawColor(bgColor);
 
@@ -991,158 +1040,22 @@ public class MChart extends View implements OnAnimDataChangeListener {
 
         frame.set(0 + leftMargin, 0 + topMargin, width - rightMargin, height - bottomMargin);
 
+
+
+        borderPaint.setColor(borderColor);//线条粗细
         //notice 绘制边框
-        canvas.drawRect(frame, lPaint);
+        canvas.drawRect(frame, borderPaint);
 
-
+        gridPaint.setColor(gridColor);//线条粗细
+        //notice 绘制横向元素
         drawableHorizontalElement(canvas);
 
         x1 = 0;
         y1 = 0;
         x2 = 0;
         y2 = 0;
-
-        /**
-         * notice 绘制Y轴label
-         * notice 首先需要判断的是是否有指定数值，如果有那么就按照指定数值数组进行分割
-         * notice 否则就按照分割数进行分割
-         */
-        if (yAxis.getLabelArrs() == null || yAxis.getLabelArrs().length == 0) {
-            //notice 绘制y轴label
-            //notice 绘制Y轴分割线
-            if (showGridVertical) {
-                for (int i = 1; i < yAxis.getMidCount() + 1; i++) {
-                    x1 = left;
-                    y1 = bottom - i * yLabelGap;
-                    x2 = right;
-                    y2 = y1;
-                    canvas.drawLine(x1, y1, x2, y2, gridPaint);
-                }
-            }
-
-            //notice 绘制纵向label
-            if (showLabelVertical) {
-                //notice 绘制起点和终点
-                if (yAxis.getiLabelFormatter() != null) {
-
-                    labelStr = yAxis.getiLabelFormatter().getLabelFormat(yAxis.getMin(), -1, -1);
-                    tPaint.getTextBounds(labelStr, 0, labelStr.length(), labelRect);
-                    labelRectHeight = labelRect.height();
-                    labelRectWidth = labelRect.width();
-                    canvas.drawText(labelStr, left - labelRectWidth - 10, bottom - labelRectHeight / 2, tPaint);
-
-                    labelStr = yAxis.getiLabelFormatter().getLabelFormat(yAxis.getMax(), -1, -1);
-                    tPaint.getTextBounds(labelStr, 0, labelStr.length(), labelRect);
-                    labelRectHeight = labelRect.height();
-                    labelRectWidth = labelRect.width();
-                    canvas.drawText(labelStr, left - labelRectWidth - 10, top + labelRectHeight, tPaint);
-                }
-
-                //notice 绘制纵向网格lable
-                for (int i = 1; i < yAxis.getMidCount() + 1; i++) {
-                    x1 = left;
-                    y1 = bottom - i * yLabelGap;
-                    x2 = right;
-                    y2 = y1;
-                    value = yAxis.getMin() + i * maxYCountGap;
-                    labelStr = yAxis.getiLabelFormatter().getLabelFormat(value, -1, -1);
-                    tPaint.getTextBounds(labelStr, 0, labelStr.length(), labelRect);
-                    labelRectHeight = labelRect.height();
-                    labelRectWidth = labelRect.width();
-                    canvas.drawText(labelStr, left - labelRectWidth - 10, y1 + labelRectHeight / 2, tPaint);
-                }
-            }
-        } else {
-            //notice 绘制y轴label
-            if (showGridVertical) {
-                for (int i = 0; i < yAxis.getLabelArrs().length; i++) {
-                    x1 = left;
-                    y1 = bottom - realHeight * (yAxis.getLabelArrs()[i] - yAxis.getMin()) / (yAxis.getMax() - yAxis.getMin());
-                    x2 = right;
-                    y2 = y1;
-                    canvas.drawLine(x1, y1, x2, y2, gridPaint);
-                }
-            }
-
-            if (showLabelVertical) {
-                for (int i = 0; i < yAxis.getLabelArrs().length; i++) {
-                    x1 = left;
-                    y1 = bottom - realHeight * (yAxis.getLabelArrs()[i] - yAxis.getMin()) / (yAxis.getMax() - yAxis.getMin());
-                    x2 = right;
-                    y2 = y1;
-                    value = yAxis.getLabelArrs()[i];
-                    labelStr = yAxis.getiLabelFormatter().getLabelFormat(value, -1, -1);
-                    tPaint.getTextBounds(labelStr, 0, labelStr.length(), labelRect);
-                    labelRectHeight = labelRect.height();
-                    labelRectWidth = labelRect.width();
-                    if (i == 0) {
-                        canvas.drawText(labelStr, left - labelRectWidth - 10, y1 - labelRectHeight / 2, tPaint);
-                    } else if (i == yAxis.getLabelArrs().length - 1) {
-                        canvas.drawText(labelStr, left - labelRectWidth - 10, y1 + labelRectHeight, tPaint);
-                    } else {
-                        canvas.drawText(labelStr, left - labelRectWidth - 10, y1 + labelRectHeight / 2, tPaint);
-                    }
-                }
-            }
-        }
-
-
-        if (y2Axis.getLabelArrs() == null || y2Axis.getLabelArrs().length == 0) {
-            //notice 绘制y轴label 边沿label
-            if (showLabelVertical) {
-                if (y2Axis.getiLabelFormatter() != null) {
-                    labelStr = y2Axis.getiLabelFormatter().getLabelFormat(y2Axis.getMin(), -1, -1);
-                    tPaint.getTextBounds(labelStr, 0, labelStr.length(), labelRect);
-                    labelRectHeight = labelRect.height();
-                    labelRectWidth = labelRect.width();
-                    canvas.drawText(labelStr, right + 10, bottom - labelRectHeight / 2, tPaint);
-
-                    labelStr = y2Axis.getiLabelFormatter().getLabelFormat(y2Axis.getMax(), -1, -1);
-                    tPaint.getTextBounds(labelStr, 0, labelStr.length(), labelRect);
-                    labelRectHeight = labelRect.height();
-                    labelRectWidth = labelRect.width();
-                    canvas.drawText(labelStr, right + 10, top + labelRectHeight, tPaint);
-                }
-
-                for (int i = 1; i < y2Axis.getMidCount() + 1; i++) {
-                    x1 = left;
-                    y1 = bottom - i * y2LabelGap;
-                    x2 = right;
-                    y2 = y1;
-                    value = y2Axis.getMin() + i * maxY2CountGap;
-
-                    labelStr = y2Axis.getiLabelFormatter().getLabelFormat(value, -1, -1);
-                    tPaint.getTextBounds(labelStr, 0, labelStr.length(), labelRect);
-                    labelRectHeight = labelRect.height();
-                    labelRectWidth = labelRect.width();
-
-                    canvas.drawText(labelStr, right + 10, y1 + labelRectHeight / 2, tPaint);
-                }
-            }
-        } else {
-            //notice 绘制y轴label
-            if (showLabelVertical) {
-                for (int i = 0; i < y2Axis.getLabelArrs().length; i++) {
-                    x1 = left;
-                    y1 = bottom - realHeight * (y2Axis.getLabelArrs()[i] - y2Axis.getMin()) / (y2Axis.getMax() - y2Axis.getMin());
-                    x2 = right;
-                    y2 = y1;
-                    value = y2Axis.getLabelArrs()[i];
-
-                    labelStr = y2Axis.getiLabelFormatter().getLabelFormat(value, -1, -1);
-                    tPaint.getTextBounds(labelStr, 0, labelStr.length(), labelRect);
-                    labelRectHeight = labelRect.height();
-                    labelRectWidth = labelRect.width();
-                    if (i == 0) {
-                        canvas.drawText(labelStr, right + 10, y1 - labelRectHeight / 2, tPaint);
-                    } else if (i == yAxis.getLabelArrs().length - 1) {
-                        canvas.drawText(labelStr, right + 10, y1 + labelRectHeight, tPaint);
-                    } else {
-                        canvas.drawText(labelStr, right + 10, y1 - labelRectHeight / 2, tPaint);
-                    }
-                }
-            }
-        }
+        //notice 绘制纵向元素
+        drawableVerticalElement(canvas);
 
         canvas.clipRect(frame);
 
@@ -1300,7 +1213,8 @@ public class MChart extends View implements OnAnimDataChangeListener {
             } else {
                 if (lastMarkerTextArr != null && lastMarkerTextArr.size() > 0) {
 
-                    canvas.drawLine(lastMarkerPx, bottom, lastMarkerPx, top, lPaint);
+                    canvas.drawLine(lastMarkerPx, bottom, lastMarkerPx, top, borderPaint);
+
                     if (lastMarkerTextArr.isEmpty()) {
 //                    Log.d(TAG, "onDraw: 11");
                         markerFrame.set(
@@ -1354,6 +1268,162 @@ public class MChart extends View implements OnAnimDataChangeListener {
                                 : (isUnderLine ? markerTLUPaint : markerTLPaint));
                     }
 
+                }
+            }
+        }
+    }
+
+    /**
+     * notice 绘制纵向元素
+     * @param canvas
+     */
+    private void drawableVerticalElement(Canvas canvas) {
+        /**
+         * notice 绘制Y轴label
+         * notice 首先需要判断的是是否有指定数值，如果有那么就按照指定数值数组进行分割
+         * notice 否则就按照分割数进行分割
+         */
+        if (yAxis.getLabelArrs() == null || yAxis.getLabelArrs().length == 0) {
+            //notice 绘制y轴label
+            //notice 绘制Y轴分割线
+            if (showGridVertical) {
+                for (int i = 1; i < yAxis.getMidCount() + 1; i++) {
+                    x1 = left;
+                    y1 = bottom - i * yLabelGap;
+                    x2 = right;
+                    y2 = y1;
+                    canvas.drawLine(x1, y1, x2, y2, gridPaint);
+                }
+            }
+
+            //notice 绘制纵向label
+            if (showLabelVertical) {
+                //notice 绘制起点和终点
+                y1Paint.setColor(y1LabelColor);
+                if (yAxis.getiLabelFormatter() != null) {
+
+                    labelStr = yAxis.getiLabelFormatter().getLabelFormat(yAxis.getMin(), -1, -1);
+                    y1Paint.getTextBounds(labelStr, 0, labelStr.length(), labelRect);
+                    labelRectHeight = labelRect.height();
+                    labelRectWidth = labelRect.width();
+                    canvas.drawText(labelStr, left - labelRectWidth - 10, bottom - labelRectHeight / 2, y1Paint);
+
+                    labelStr = yAxis.getiLabelFormatter().getLabelFormat(yAxis.getMax(), -1, -1);
+                    y1Paint.getTextBounds(labelStr, 0, labelStr.length(), labelRect);
+                    labelRectHeight = labelRect.height();
+                    labelRectWidth = labelRect.width();
+                    canvas.drawText(labelStr, left - labelRectWidth - 10, top + labelRectHeight, y1Paint);
+                }
+
+                //notice 绘制纵向网格lable
+                for (int i = 1; i < yAxis.getMidCount() + 1; i++) {
+                    x1 = left;
+                    y1 = bottom - i * yLabelGap;
+                    x2 = right;
+                    y2 = y1;
+                    value = yAxis.getMin() + i * maxYCountGap;
+                    labelStr = yAxis.getiLabelFormatter().getLabelFormat(value, -1, -1);
+                    y1Paint.getTextBounds(labelStr, 0, labelStr.length(), labelRect);
+                    labelRectHeight = labelRect.height();
+                    labelRectWidth = labelRect.width();
+                    canvas.drawText(labelStr, left - labelRectWidth - 10, y1 + labelRectHeight / 2, y1Paint);
+                }
+            }
+        } else {
+            //notice 绘制y轴label
+            if (showGridVertical) {
+                for (int i = 0; i < yAxis.getLabelArrs().length; i++) {
+                    x1 = left;
+                    y1 = bottom - realHeight * (yAxis.getLabelArrs()[i] - yAxis.getMin()) / (yAxis.getMax() - yAxis.getMin());
+                    x2 = right;
+                    y2 = y1;
+                    canvas.drawLine(x1, y1, x2, y2, gridPaint);
+                }
+            }
+
+            if (showLabelVertical) {
+                y1Paint.setColor(y1LabelColor);
+                for (int i = 0; i < yAxis.getLabelArrs().length; i++) {
+                    x1 = left;
+                    y1 = bottom - realHeight * (yAxis.getLabelArrs()[i] - yAxis.getMin()) / (yAxis.getMax() - yAxis.getMin());
+                    x2 = right;
+                    y2 = y1;
+                    value = yAxis.getLabelArrs()[i];
+                    labelStr = yAxis.getiLabelFormatter().getLabelFormat(value, -1, -1);
+                    y1Paint.getTextBounds(labelStr, 0, labelStr.length(), labelRect);
+                    labelRectHeight = labelRect.height();
+                    labelRectWidth = labelRect.width();
+                    if (i == 0) {
+                        canvas.drawText(labelStr, left - labelRectWidth - 10, y1 - labelRectHeight / 2, y1Paint);
+                    } else if (i == yAxis.getLabelArrs().length - 1) {
+                        canvas.drawText(labelStr, left - labelRectWidth - 10, y1 + labelRectHeight, y1Paint);
+                    } else {
+                        canvas.drawText(labelStr, left - labelRectWidth - 10, y1 + labelRectHeight / 2, y1Paint);
+                    }
+                }
+            }
+        }
+
+        /**
+         * notice 绘制Y2轴label
+         * notice 首先需要判断的是是否有指定数值，如果有那么就按照指定数值数组进行分割
+         * notice 否则就按照分割数进行分割
+         */
+        if (y2Axis.getLabelArrs() == null || y2Axis.getLabelArrs().length == 0) {
+            //notice 绘制y轴label 边沿label
+            if (showLabelVertical) {
+                y2Paint.setColor(y2LabelColor);
+                if (y2Axis.getiLabelFormatter() != null) {
+                    labelStr = y2Axis.getiLabelFormatter().getLabelFormat(y2Axis.getMin(), -1, -1);
+                    y2Paint.getTextBounds(labelStr, 0, labelStr.length(), labelRect);
+                    labelRectHeight = labelRect.height();
+                    labelRectWidth = labelRect.width();
+                    canvas.drawText(labelStr, right + 10, bottom - labelRectHeight / 2, y2Paint);
+
+                    labelStr = y2Axis.getiLabelFormatter().getLabelFormat(y2Axis.getMax(), -1, -1);
+                    y2Paint.getTextBounds(labelStr, 0, labelStr.length(), labelRect);
+                    labelRectHeight = labelRect.height();
+                    labelRectWidth = labelRect.width();
+                    canvas.drawText(labelStr, right + 10, top + labelRectHeight, y2Paint);
+                }
+
+                for (int i = 1; i < y2Axis.getMidCount() + 1; i++) {
+                    x1 = left;
+                    y1 = bottom - i * y2LabelGap;
+                    x2 = right;
+                    y2 = y1;
+                    value = y2Axis.getMin() + i * maxY2CountGap;
+
+                    labelStr = y2Axis.getiLabelFormatter().getLabelFormat(value, -1, -1);
+                    y2Paint.getTextBounds(labelStr, 0, labelStr.length(), labelRect);
+                    labelRectHeight = labelRect.height();
+                    labelRectWidth = labelRect.width();
+
+                    canvas.drawText(labelStr, right + 10, y1 + labelRectHeight / 2, y2Paint);
+                }
+            }
+        } else {
+            //notice 绘制y轴label
+            if (showLabelVertical) {
+                y2Paint.setColor(y2LabelColor);
+                for (int i = 0; i < y2Axis.getLabelArrs().length; i++) {
+                    x1 = left;
+                    y1 = bottom - realHeight * (y2Axis.getLabelArrs()[i] - y2Axis.getMin()) / (y2Axis.getMax() - y2Axis.getMin());
+                    x2 = right;
+                    y2 = y1;
+                    value = y2Axis.getLabelArrs()[i];
+
+                    labelStr = y2Axis.getiLabelFormatter().getLabelFormat(value, -1, -1);
+                    y2Paint.getTextBounds(labelStr, 0, labelStr.length(), labelRect);
+                    labelRectHeight = labelRect.height();
+                    labelRectWidth = labelRect.width();
+                    if (i == 0) {
+                        canvas.drawText(labelStr, right + 10, y1 - labelRectHeight / 2, y2Paint);
+                    } else if (i == yAxis.getLabelArrs().length - 1) {
+                        canvas.drawText(labelStr, right + 10, y1 + labelRectHeight, y2Paint);
+                    } else {
+                        canvas.drawText(labelStr, right + 10, y1 - labelRectHeight / 2, y2Paint);
+                    }
                 }
             }
         }
@@ -1509,6 +1579,10 @@ public class MChart extends View implements OnAnimDataChangeListener {
         }
     }
 
+    /**
+     * notice 绘制横向元素
+     * @param canvas
+     */
     private void drawableHorizontalElement(Canvas canvas) {
         //notice 绘制横向网格
         if (showGridHorizontal) {
@@ -1523,6 +1597,7 @@ public class MChart extends View implements OnAnimDataChangeListener {
 
         //notice 绘制横向网格label
         if (showLabelHorizontal) {
+            xPaint.setColor(xLabelColor);
             x1 = 0;
             y1 = 0;
             x2 = 0;
@@ -1531,16 +1606,16 @@ public class MChart extends View implements OnAnimDataChangeListener {
             if (tempXAxis.getiLabelFormatter() != null) {
 
                 labelStr = tempXAxis.getiLabelFormatter().getLabelFormat(tempXAxis.getMin(), tempXAxis.getMin(), tempXAxis.getMax());
-                tPaint.getTextBounds(labelStr, 0, labelStr.length(), labelRect);
+                xPaint.getTextBounds(labelStr, 0, labelStr.length(), labelRect);
                 labelRectHeight = labelRect.height();
                 labelRectWidth = labelRect.width();
-                canvas.drawText(labelStr, left, bottom + labelRectHeight + 10, tPaint);
+                canvas.drawText(labelStr, left, bottom + labelRectHeight + 10, xPaint);
 
                 labelStr = tempXAxis.getiLabelFormatter().getLabelFormat(tempXAxis.getMax(), tempXAxis.getMin(), tempXAxis.getMax());
-                tPaint.getTextBounds(labelStr, 0, labelStr.length(), labelRect);
+                xPaint.getTextBounds(labelStr, 0, labelStr.length(), labelRect);
                 labelRectHeight = labelRect.height();
                 labelRectWidth = labelRect.width();
-                canvas.drawText(labelStr, right - labelRectWidth, bottom + labelRectHeight + 10, tPaint);
+                canvas.drawText(labelStr, right - labelRectWidth, bottom + labelRectHeight + 10, xPaint);
             }
 
             for (int i = 1; i < tempXAxis.getMidCount() + 1; i++) {
@@ -1550,10 +1625,10 @@ public class MChart extends View implements OnAnimDataChangeListener {
                 y2 = bottom;
                 labelValue = tempXAxis.getMin() + i * maxXCountGap;
                 labelStr = tempXAxis.getiLabelFormatter().getLabelFormat(labelValue, tempXAxis.getMin(), tempXAxis.getMax());
-                tPaint.getTextBounds(labelStr, 0, labelStr.length(), labelRect);
+                xPaint.getTextBounds(labelStr, 0, labelStr.length(), labelRect);
                 labelRectHeight = labelRect.height();
                 labelRectWidth = labelRect.width();
-                canvas.drawText(labelStr, x1 - labelRectWidth / 2, bottom + labelRectHeight + 10, tPaint);
+                canvas.drawText(labelStr, x1 - labelRectWidth / 2, bottom + labelRectHeight + 10, xPaint);
             }
         }
     }
@@ -1672,4 +1747,5 @@ public class MChart extends View implements OnAnimDataChangeListener {
     public void onAnimDataChanged() {
         invalidate();
     }
+
 }
