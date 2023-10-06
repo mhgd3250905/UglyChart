@@ -45,7 +45,7 @@ public class Double2LineSet extends SingleDataSet {
 
 
     @Override
-    public void drawDoubleEntry(Canvas canvas, PXY p1, PXY p2, ViewportInfo viewportInfo) {
+    public void drawDoubleEntry(Canvas canvas,int index, PXY p1, PXY p2, ViewportInfo viewportInfo) {
         float x1=p1.getX();
         float x2=p2.getX();
         float y1=p1.getY();

@@ -50,7 +50,7 @@ public class CurveLineDataSet extends SingleDataSet {
     }
 
     @Override
-    public void drawDoubleEntry(Canvas canvas, PXY p1,PXY p2, ViewportInfo viewportInfo) {
+    public void drawDoubleEntry(Canvas canvas,int index, PXY p1,PXY p2, ViewportInfo viewportInfo) {
         Path path=new Path();
         path.moveTo(p1.x,p1.y);
         path.lineTo(p2.x,p2.y);

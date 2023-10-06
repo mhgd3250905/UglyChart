@@ -1,7 +1,6 @@
 package com.bboyuglyk.chart_sdk;
 
 
-
 import static com.bboyuglyk.chart_sdk.DataType.bar;
 import static com.bboyuglyk.chart_sdk.DataType.bitmap;
 import static com.bboyuglyk.chart_sdk.DataType.range_bar;
@@ -116,7 +115,7 @@ public class MChart extends View implements OnAnimDataChangeListener {
     private Rect labelRect = new Rect();
     private int labelRectHeight;
     private int labelRectWidth;
-    private int bgColor=Color.WHITE;
+    private int bgColor = Color.WHITE;
     private int xLabelColor;
     private int y1LabelColor;
     private int y2LabelColor;
@@ -124,13 +123,14 @@ public class MChart extends View implements OnAnimDataChangeListener {
     public void setBgColor(int bgColor) {
         this.bgColor = bgColor;
     }
-    private int borderColor=Color.GRAY;
+
+    private int borderColor = Color.GRAY;
 
     public void setBorderColor(int borderColor) {
         this.borderColor = borderColor;
     }
 
-    private int gridColor=Color.GRAY;
+    private int gridColor = Color.GRAY;
 
     public void setGridColor(int gridColor) {
         this.gridColor = gridColor;
@@ -155,10 +155,10 @@ public class MChart extends View implements OnAnimDataChangeListener {
     }
 
 
-    public void setLabelColor(int xLabelColor, int y1LabelColor,int y2LabelColor) {
-        this.xLabelColor=xLabelColor;
-        this.y1LabelColor=y1LabelColor;
-        this.y2LabelColor=y2LabelColor;
+    public void setLabelColor(int xLabelColor, int y1LabelColor, int y2LabelColor) {
+        this.xLabelColor = xLabelColor;
+        this.y1LabelColor = y1LabelColor;
+        this.y2LabelColor = y2LabelColor;
     }
 
     public void setMargin(int left, int top, int rifght, int bottom) {
@@ -1041,7 +1041,6 @@ public class MChart extends View implements OnAnimDataChangeListener {
         frame.set(0 + leftMargin, 0 + topMargin, width - rightMargin, height - bottomMargin);
 
 
-
         borderPaint.setColor(borderColor);//线条粗细
         //notice 绘制边框
         canvas.drawRect(frame, borderPaint);
@@ -1275,6 +1274,7 @@ public class MChart extends View implements OnAnimDataChangeListener {
 
     /**
      * notice 绘制纵向元素
+     *
      * @param canvas
      */
     private void drawableVerticalElement(Canvas canvas) {
@@ -1445,7 +1445,7 @@ public class MChart extends View implements OnAnimDataChangeListener {
             }
 
             if (nextDataSet.getValue().getEntryDrafter() != null)
-                nextDataSet.getValue().getEntryDrafter().drawSingleEntry(canvas, new PXY(pX, pY), new ViewportInfo(left, top, right, bottom));
+                nextDataSet.getValue().getEntryDrafter().drawSingleEntry(canvas, i, new PXY(pX, pY), new ViewportInfo(left, top, right, bottom));
 
         }
     }
@@ -1480,7 +1480,7 @@ public class MChart extends View implements OnAnimDataChangeListener {
             pY1 = bottom - (y1 - yAxis.getMin()) * realHeight / (yAxis.getMax() - yAxis.getMin());
 
             if (nextDataSet.getValue().getEntryDrafter() != null)
-                nextDataSet.getValue().getEntryDrafter().drawDoubleEntry(canvas, new PXY(pX0, pY0), new PXY(pX1, pY1), new ViewportInfo(left, top, right, bottom));
+                nextDataSet.getValue().getEntryDrafter().drawDoubleEntry(canvas, i, new PXY(pX0, pY0), new PXY(pX1, pY1), new ViewportInfo(left, top, right, bottom));
 
         }
     }
@@ -1523,13 +1523,13 @@ public class MChart extends View implements OnAnimDataChangeListener {
             pY2 = bottom - (y2 - yAxis.getMin()) * realHeight / (yAxis.getMax() - yAxis.getMin());
 
             if (nextDataSet.getValue().getEntryDrafter() != null)
-                nextDataSet.getValue().getEntryDrafter().drawTripleEntry(canvas, new PXY(pX0, pY0), new PXY(pX1, pY1),new PXY(pX2, pY2), new ViewportInfo(left, top, right, bottom));
+                nextDataSet.getValue().getEntryDrafter().drawTripleEntry(canvas, i, new PXY(pX0, pY0), new PXY(pX1, pY1), new PXY(pX2, pY2), new ViewportInfo(left, top, right, bottom));
 
         }
     }
 
     private void drawQuatraPoint(Canvas canvas) {
-        float x0, x1, x2,x3, y0, y1, y2,y3, pX0, pY0, pX1, pY1, pX2, pY2, pX3, pY3;
+        float x0, x1, x2, x3, y0, y1, y2, y3, pX0, pY0, pX1, pY1, pX2, pY2, pX3, pY3;
         int size = 3;
         for (int i = 0; i < nextDataSet.getValue().getEntries().size() - 3; i++) {
 //            if(i%size!=0) continue;
@@ -1544,10 +1544,10 @@ public class MChart extends View implements OnAnimDataChangeListener {
 
             x3 = nextDataSet.getValue().getEntries().get(i + 3).getX();
             y3 = nextDataSet.getValue().getEntries().get(i + 3).getY();
-            if (x0 < tempXAxis.getMin() && x1 < tempXAxis.getMin() && x2 < tempXAxis.getMin()&& x3 < tempXAxis.getMin()) {
+            if (x0 < tempXAxis.getMin() && x1 < tempXAxis.getMin() && x2 < tempXAxis.getMin() && x3 < tempXAxis.getMin()) {
                 continue;
             }
-            if (x0 > tempXAxis.getMax() && x1 > tempXAxis.getMax() && x2 > tempXAxis.getMax()&& x3 > tempXAxis.getMax()) {
+            if (x0 > tempXAxis.getMax() && x1 > tempXAxis.getMax() && x2 > tempXAxis.getMax() && x3 > tempXAxis.getMax()) {
                 continue;
             }
             if (x0 < tempXAxis.getMin()) {
@@ -1574,13 +1574,14 @@ public class MChart extends View implements OnAnimDataChangeListener {
             pY3 = bottom - (y3 - yAxis.getMin()) * realHeight / (yAxis.getMax() - yAxis.getMin());
 
             if (nextDataSet.getValue().getEntryDrafter() != null)
-                nextDataSet.getValue().getEntryDrafter().drawQuatraEntry(canvas, new PXY(pX0, pY0), new PXY(pX1, pY1),new PXY(pX2, pY2),new PXY(pX3, pY3), new ViewportInfo(left, top, right, bottom));
+                nextDataSet.getValue().getEntryDrafter().drawQuatraEntry(canvas, i, new PXY(pX0, pY0), new PXY(pX1, pY1), new PXY(pX2, pY2), new PXY(pX3, pY3), new ViewportInfo(left, top, right, bottom));
 
         }
     }
 
     /**
      * notice 绘制横向元素
+     *
      * @param canvas
      */
     private void drawableHorizontalElement(Canvas canvas) {

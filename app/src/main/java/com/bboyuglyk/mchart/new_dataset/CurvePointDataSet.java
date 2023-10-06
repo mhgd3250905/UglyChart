@@ -48,7 +48,7 @@ public class CurvePointDataSet extends SingleDataSet {
     }
 
     @Override
-    public void drawSingleEntry(Canvas canvas, PXY p, ViewportInfo viewportInfo) {
+    public void drawSingleEntry(Canvas canvas,int index, PXY p, ViewportInfo viewportInfo) {
         canvas.drawCircle(p.getX(), p.getY(), radius, paint);
     }
 

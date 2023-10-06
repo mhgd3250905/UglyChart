@@ -47,12 +47,12 @@ public class QuatraLineSet extends SingleDataSet {
     }
 
     @Override
-    public void drawQuatraEntry(Canvas canvas, PXY p1, PXY p2, PXY p3, PXY p4, ViewportInfo viewportInfo) {
-        super.drawQuatraEntry(canvas, p1, p2, p3, p4, viewportInfo);
+    public void drawQuatraEntry(Canvas canvas, int index, PXY p1, PXY p2, PXY p3, PXY p4, ViewportInfo viewportInfo) {
+        super.drawQuatraEntry(canvas, index, p1, p2, p3, p4, viewportInfo);
 
         canvas.drawCircle(p2.x, p2.y, radius, paint);
 
-        for (int i = 0; i <100; i++) {
+        for (int i = 0; i < 100; i++) {
             PXY pxy = QuatraLineSet.CatmullRomPoint(p1, p2, p3, p4, (i * 1.0f) / 100);
             canvas.drawCircle(pxy.x, pxy.y, radius, paint);
         }

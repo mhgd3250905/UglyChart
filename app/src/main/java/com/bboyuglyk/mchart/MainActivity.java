@@ -13,6 +13,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
     private MChart chart;
     private Button btnLineChart;
+    private Button btnBarChart;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -20,11 +21,19 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         chart = findViewById(R.id.chart_curve);
         btnLineChart = findViewById(R.id.btn_line_chart);
+        btnBarChart = findViewById(R.id.btn_bar_chart);
 
         btnLineChart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(MainActivity.this,LineActivity.class));
+            }
+        });
+
+        btnBarChart.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainActivity.this,BarActivity.class));
             }
         });
 

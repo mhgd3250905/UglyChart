@@ -183,22 +183,22 @@ public abstract class DataSet implements IEntryDrafter {
     }
 
     @Override
-    public void drawSingleEntry(Canvas canvas, PXY p, ViewportInfo viewportInfo) {
+    public void drawSingleEntry(Canvas canvas, int index, PXY p, ViewportInfo viewportInfo) {
 
     }
 
     @Override
-    public void drawDoubleEntry(Canvas canvas, PXY p1, PXY p2, ViewportInfo viewportInfo) {
+    public void drawDoubleEntry(Canvas canvas, int index, PXY p1, PXY p2, ViewportInfo viewportInfo) {
 
     }
 
     @Override
-    public void drawTripleEntry(Canvas canvas, PXY p1, PXY p2, PXY p3, ViewportInfo viewportInfo) {
+    public void drawTripleEntry(Canvas canvas, int index, PXY p1, PXY p2, PXY p3, ViewportInfo viewportInfo) {
 
     }
 
     @Override
-    public void drawQuatraEntry(Canvas canvas, PXY p1, PXY p2, PXY p3, PXY p4, ViewportInfo viewportInfo) {
+    public void drawQuatraEntry(Canvas canvas, int index, PXY p1, PXY p2, PXY p3, PXY p4, ViewportInfo viewportInfo) {
 
     }
 
