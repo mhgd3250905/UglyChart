@@ -15,6 +15,7 @@ import java.util.LinkedList;
 
 public class PointDataSet extends SingleDataSet {
     private float radius = 5f;
+    private int pointColor;
 
     public PointDataSet(Context context, String tag, LinkedList<Entry> entries) {
         super(context, tag, DataType.SinglePoint, entries);
@@ -26,13 +27,18 @@ public class PointDataSet extends SingleDataSet {
         setEntryDrafter(this);
         Paint paint = new Paint();
         paint.setAntiAlias(true);//设置抗锯齿
-        paint.setStyle(Paint.Style.FILL);//实心
+        paint.setStyle(Paint.Style.STROKE);//实心
         paint.setStrokeWidth(4);//线条粗细
-        paint.setColor(Color.BLACK);//线条粗细
+        paint.setColor(Color.WHITE);//线条粗细
         setPaint(paint);
         setShowMarker(true);
     }
 
+
+    public void setLineColor(int pointColor) {
+        this.pointColor = pointColor;
+        paint.setColor(pointColor);
+    }
 
     public float getRadius() {
         return radius;

@@ -13,74 +13,89 @@ import com.bboyuglyk.chart_sdk.ILabelFormatter;
 import com.bboyuglyk.chart_sdk.MChart;
 import com.bboyuglyk.mchart.new_dataset.CurveLineDataSet;
 import com.bboyuglyk.mchart.new_dataset.LineDataSet;
+import com.bboyuglyk.mchart.new_dataset.PointDataSet;
 
 import java.util.LinkedList;
 
 public class LineActivity extends AppCompatActivity {
     private MChart curveLineChart;
     private MChart lineChart;
+    private MChart pointsChart;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_line);
         curveLineChart = findViewById(R.id.chart_curve);
         lineChart = findViewById(R.id.chart_line);
+        pointsChart = findViewById(R.id.chart_points);
 
         initChart(curveLineChart);
         initChart(lineChart);
-        initCurveData(curveLineChart);
-        initLineData(lineChart);
+        initChart(pointsChart);
+        initCurveData();
     }
 
 
-    private void initCurveData(MChart chart) {
+    private void initCurveData() {
         LinkedList<Entry> entries = new LinkedList<>();
         LinkedList<Entry> entries2 = new LinkedList<>();
+        String[] strArr=null;
         for (int i = 0; i < 11; i++) {
             float randomY = 200 + (float) (Math.random() * 200);
             float randomY2 = 100 + (float) (Math.random() * 100);
-            entries.add(new Entry(i * 200, randomY));
-            entries2.add(new Entry(i * 200, randomY2));
+            strArr=new String[2];
+            strArr[0]=i*200+"";
+            strArr[1]=randomY+"";
+            Entry entry1 = new Entry(i * 200, randomY, strArr);
+            entry1.setTag(ChartDataKeyMap.SG_GLUCOSE_LOW);
+            entries.add(entry1);
+            strArr=new String[2];
+            strArr[0]=i*200+"";
+            strArr[1]=randomY2+"";
+            Entry entry2 = new Entry(i * 200, randomY2, strArr);
+            entry2.setTag(ChartDataKeyMap.SG_GLUCOSE);
+            entries2.add(entry2);
         }
 
 
-        CurveLineDataSet linDataSet = new CurveLineDataSet(LineActivity.this, ChartDataKeyMap.SG_GLUCOSE_LOW, entries);
-        linDataSet.setColors(new int[]{
+        CurveLineDataSet curveLineDataSet = new CurveLineDataSet(LineActivity.this, ChartDataKeyMap.SG_GLUCOSE_LOW, entries);
+        curveLineDataSet.setColors(new int[]{
                 ContextCompat.getColor(LineActivity.this,R.color.teal_200),
                 ContextCompat.getColor(LineActivity.this,R.color.purple_200),
                 Color.TRANSPARENT
         });
-        chart.addAnimDataSet(linDataSet);
+        curveLineChart.addAnimDataSet(curveLineDataSet);
 
-        CurveLineDataSet linDataSet2 = new CurveLineDataSet(LineActivity.this, ChartDataKeyMap.SG_GLUCOSE, entries2);
-        linDataSet2.setColors(new int[]{Color.WHITE,Color.WHITE});
-        chart.addAnimDataSet(linDataSet2);
+        CurveLineDataSet curveLineDataSet2 = new CurveLineDataSet(LineActivity.this, ChartDataKeyMap.SG_GLUCOSE, entries2);
+        curveLineDataSet2.setColors(new int[]{Color.WHITE,Color.WHITE});
+        curveLineChart.addAnimDataSet(curveLineDataSet2);
 
-        chart.invalidate();
-    }
+        curveLineChart.invalidate();
 
-
-    private void initLineData(MChart chart) {
-        LinkedList<Entry> entries = new LinkedList<>();
-        LinkedList<Entry> entries2 = new LinkedList<>();
-        for (int i = 0; i < 11; i++) {
-            float randomY = 200 + (float) (Math.random() * 200);
-            float randomY2 = 100 + (float) (Math.random() * 100);
-            entries.add(new Entry(i * 200, randomY));
-            entries2.add(new Entry(i * 200, randomY2));
-        }
 
 
         LineDataSet linDataSet = new LineDataSet(LineActivity.this, ChartDataKeyMap.SG_GLUCOSE_LOW, entries);
         linDataSet.setLineColor(ContextCompat.getColor(LineActivity.this,R.color.teal_200));
-        chart.addAnimDataSet(linDataSet);
+        lineChart.addAnimDataSet(linDataSet);
 
         LineDataSet linDataSet2 = new LineDataSet(LineActivity.this, ChartDataKeyMap.SG_GLUCOSE, entries2);
         linDataSet2.setLineColor(ContextCompat.getColor(LineActivity.this,R.color.purple_500));
-        chart.addAnimDataSet(linDataSet2);
+        lineChart.addAnimDataSet(linDataSet2);
 
-        chart.invalidate();
+        lineChart.invalidate();
+
+        PointDataSet pointDataSet = new PointDataSet(LineActivity.this, ChartDataKeyMap.SG_GLUCOSE_LOW, entries);
+        pointDataSet.setLineColor(ContextCompat.getColor(LineActivity.this,R.color.teal_200));
+        pointsChart.addDataSet(pointDataSet);
+
+        PointDataSet pointDataSet2 = new PointDataSet(LineActivity.this, ChartDataKeyMap.SG_GLUCOSE, entries2);
+        pointDataSet2.setLineColor(ContextCompat.getColor(LineActivity.this,R.color.purple_500));
+        pointsChart.addDataSet(pointDataSet2);
+
+        pointsChart.invalidate();
     }
+
+
 
     private void initChart(MChart chart) {
         //设置数据集合绘制优先级
@@ -97,6 +112,7 @@ public class LineActivity extends AppCompatActivity {
         chart.setGridColor(ContextCompat.getColor(LineActivity.this,R.color.white));
         //设置边框颜色
         chart.setBorderColor(Color.YELLOW);
+        chart.setMarkerBuilder(new MMarkerBuilder(LineActivity.this));
         BaseAxis xAxis = new BaseAxis();
         xAxis.setMin(0);
         xAxis.setMax(2000);

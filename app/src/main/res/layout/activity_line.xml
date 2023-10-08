@@ -18,7 +18,7 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:padding="5dp"
-            android:text="曲 线"
+            android:text="曲线图"
             android:textColor="@color/white"
             android:textSize="20dp"
             app:layout_constraintBottom_toTopOf="@id/chart_curve"
@@ -42,7 +42,7 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:padding="5dp"
-            android:text="折 线"
+            android:text="折线图"
             android:textColor="@color/white"
             android:textSize="20dp"
             app:layout_constraintTop_toBottomOf="@id/chart_curve"
@@ -58,6 +58,29 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tv_line" />
+
+        <TextView
+            android:id="@+id/tv_points"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:padding="5dp"
+            android:text="点 图"
+            android:textColor="@color/white"
+            android:textSize="20dp"
+            app:layout_constraintTop_toBottomOf="@id/chart_line"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+
+        <com.bboyuglyk.chart_sdk.MChart
+            android:id="@+id/chart_points"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintDimensionRatio="w,1:2"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tv_points" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.core.widget.NestedScrollView>

@@ -19,6 +19,9 @@ public class SingleDataSet extends AnimDataSet {
 
     public SingleDataSet(Context context, String tag, DataType type, LinkedList<Entry> baseEntries) {
         super(context, tag, type);
+        for (Entry baseEntry : baseEntries) {
+            baseEntry.setDataType(type);
+        }
         setBaseEntries(baseEntries);
         if (type == DataType.CurveSingle||type == DataType.CurveDouble) {
             setEntries(DataConverter.convertToCurve(baseEntries));
