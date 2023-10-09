@@ -9,6 +9,7 @@ import androidx.core.content.ContextCompat;
 import com.bboyuglyk.chart_sdk.BaseAxis;
 import com.bboyuglyk.chart_sdk.ChartDataKeyMap;
 import com.bboyuglyk.chart_sdk.Entry;
+import com.bboyuglyk.chart_sdk.HightlightMode;
 import com.bboyuglyk.chart_sdk.ILabelFormatter;
 import com.bboyuglyk.chart_sdk.MChart;
 import com.bboyuglyk.mchart.new_dataset.LineDataSet;
@@ -41,11 +42,13 @@ public class BarActivity extends AppCompatActivity {
 
     private void initSingleBarData(MChart chart) {
         LinkedList<Entry> entries = new LinkedList<>();
-        LinkedList<Entry> entries2 = new LinkedList<>();
+        String[] strArr=null;
         for (int i = 1; i < 10; i++) {
             float randomY = 200 + (float) (Math.random() * 200);
-            float randomY2 = 100 + (float) (Math.random() * 100);
-            entries.add(new Entry(i * 20, randomY));
+            strArr=new String[2];
+            strArr[0]=i*200+"";
+            strArr[1]=randomY+"";
+            entries.add(new Entry(i * 20, randomY,strArr));
         }
 
 
@@ -59,10 +62,8 @@ public class BarActivity extends AppCompatActivity {
 
     private void initComboBarData(MChart chart) {
         LinkedList<Entry> entries = new LinkedList<>();
-        LinkedList<Entry> entries2 = new LinkedList<>();
         for (int i = 1; i < 19; i++) {
             float randomY = 200 + (float) (Math.random() * 200);
-            float randomY2 = 100 + (float) (Math.random() * 100);
             entries.add(new Entry(i * 10, randomY));
         }
 
@@ -75,10 +76,8 @@ public class BarActivity extends AppCompatActivity {
 
     private void initCombo2BarData(MChart chart) {
         LinkedList<Entry> entries = new LinkedList<>();
-        LinkedList<Entry> entries2 = new LinkedList<>();
         for (int i = 1; i < 19; i++) {
             float randomY = 200 + (float) (Math.random() * 200);
-            float randomY2 = 100 + (float) (Math.random() * 100);
             entries.add(new Entry(i * 10, randomY));
         }
 
@@ -103,6 +102,12 @@ public class BarActivity extends AppCompatActivity {
         chart.setGridColor(ContextCompat.getColor(BarActivity.this,R.color.white));
         //设置边框颜色
         chart.setBorderColor(Color.WHITE);
+        //设置Marker构造器
+        chart.setMarkerBuilder(new MBarMarkerBuilder(BarActivity.this));
+        //设置highlight寻找模式
+        chart.setHightlightMode(HightlightMode.desorption);
+        //设置Highlight构造器
+        chart.setHighlightBuilder(new MBarHighlightBuilder(BarActivity.this));
         BaseAxis xAxis = new BaseAxis();
         xAxis.setMin(0);
         xAxis.setMax(200);

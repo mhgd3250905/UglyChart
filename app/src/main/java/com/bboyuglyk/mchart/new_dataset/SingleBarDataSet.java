@@ -62,6 +62,6 @@ public class SingleBarDataSet extends SingleDataSet {
 
     @Override
     public float getFoundNearRange() {
-        return radius;
+        return 40f;
     }
 }

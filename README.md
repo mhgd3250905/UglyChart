@@ -1,7 +1,31 @@
 # UglyChart
-### Bboy ug1yK's Chart 
 
-[![](https://jitpack.io/v/mhgd3250905/UglyChart.svg)](https://jitpack.io/#mhgd3250905/UglyChart)
+
+# How to
+
+![](https://jitpack.io/v/mhgd3250905/UglyChart.svg)
+
+To get a Git project into your build:
+
+**Step 1.** Add the JitPack repository to your build file
+
+```groovy
+	dependencyResolutionManagement {
+		repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+		repositories {
+			mavenCentral()
+			maven { url 'https://jitpack.io' }
+		}
+	}
+```
+
+**Step 2.** Add the dependency
+
+```groovy
+	dependencies {
+	        implementation 'com.github.mhgd3250905:UglyChart:Tag'
+	}
+```
 
 
 
