@@ -12,6 +12,7 @@ public interface IEntryDrafter {
 
     void drawQuatraEntry(Canvas canvas, int index, PXY p1, PXY p2, PXY p3, PXY p4, ViewportInfo viewportInfo);
 
+    void drawHighlightEntry(Canvas canvas, int index, PXY p, ViewportInfo viewportInfo);
 
     void drawPointEntry(Canvas canvas, float x, float y, float left, float top, float right, float bottom);
 
@@ -22,4 +23,6 @@ public interface IEntryDrafter {
     void drawComposeRect(Canvas canvas, float left, float top, float right, float bottom, float x, float maxY, float... midY);
 
     void drawRangeBar(Canvas canvas, float x, float y, float left, float top, float right, float bottom, float range);
+
+
 }

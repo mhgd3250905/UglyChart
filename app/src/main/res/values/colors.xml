@@ -10,4 +10,6 @@
     <color name="white">#FFFFFFFF</color>
     <color name="chart_bg_dark">#282e39</color>
     <color name="orange">#e55039</color>
+    <color name="high_light_shadow_color">#bed742</color>
+    <color name="high_light_find_color">#55d24735</color>
 </resources>

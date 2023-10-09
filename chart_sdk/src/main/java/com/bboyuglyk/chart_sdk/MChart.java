@@ -1,10 +1,6 @@
 package com.bboyuglyk.chart_sdk;
 
 
-import static com.bboyuglyk.chart_sdk.DataType.bar;
-import static com.bboyuglyk.chart_sdk.DataType.bitmap;
-import static com.bboyuglyk.chart_sdk.DataType.range_bar;
-
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -87,7 +83,22 @@ public class MChart extends View implements OnAnimDataChangeListener {
     private int labelValue;
 
     private MarkerBuilder markerBuilder;
+
+    private IHighlightBuilder highlightBuilder;
+
+    public void setHighlightBuilder(IHighlightBuilder highlightBuilder) {
+        this.highlightBuilder = highlightBuilder;
+    }
+
     private float markerHeight;
+    private Entry findEntry;
+
+    //notice 触摸吸附模式
+    private HightlightMode hightlightMode = HightlightMode.desorption;
+
+    public void setHightlightMode(HightlightMode hightlightMode) {
+        this.hightlightMode = hightlightMode;
+    }
 
     public void setMarkerBuilder(MarkerBuilder markerBuilder) {
         this.markerBuilder = markerBuilder;
@@ -317,6 +328,8 @@ public class MChart extends View implements OnAnimDataChangeListener {
 
         markerBuilder = new MarkerBuilder();
 
+        highlightBuilder = new HighlightBuilder();
+
         actionDownTypes = new ArraySet<>();
 //        actionDownTypes.add(bitmap);
 //        actionDownTypes.add(bar);
@@ -508,7 +521,7 @@ public class MChart extends View implements OnAnimDataChangeListener {
                     downX = event.getX();
                     downY = event.getY();
 
-                    findNearbyEntries(x, y, actionDownTypes, null, true);
+                    findNearbyEntries(x, y, true);
                     invalidate();
                     break;
                 case MotionEvent.ACTION_POINTER_DOWN:
@@ -526,10 +539,10 @@ public class MChart extends View implements OnAnimDataChangeListener {
 //                    Log.d(TAG, "onTouchEvent ACTION_MOVE: (" + x + ", " + y + ") pointerCount= " + pointerCount);
                     if (pointerCount == 1) {
                         if (event.getX() == downX && event.getY() == downY) {
-                            findNearbyEntries(x, y, actionDownTypes, null, false);
+                            findNearbyEntries(x, y, false);
                             invalidate();
                         } else {
-                            findNearbyEntries(x, y, null, actionMoveTypes, false);
+                            findNearbyEntries(x, y, false);
                             invalidate();
                         }
                     } else if (pointerCount == 2) {
@@ -699,23 +712,18 @@ public class MChart extends View implements OnAnimDataChangeListener {
      *
      * @param x
      * @param y
-     * @param targetTypes
-     * @param exceptTypes
      * @param touchDown
      */
-    private void findNearbyEntries(float x, float y, Set<DataType> targetTypes, Set<DataType> exceptTypes, boolean touchDown) {
+    private void findNearbyEntries(float x, float y, boolean touchDown) {
 //        Log.d(TAG, "findNearbyEntries() called with: x = [" + x + "], y = [" + y + "], touchDown = [" + touchDown + "]");
         nearRange = 10000;
-        nearPx = -1;
+        nearPx = x;
         highLighter.getNearEntriesMap().clear();
         dataSetIterator = dataSetBox.getDataSetMap().entrySet().iterator();
         while (dataSetIterator.hasNext()) {
             nextDataSet = dataSetIterator.next();
             type = nextDataSet.getValue().getType();
-
-//            if (exceptTypes == null || !exceptTypes.contains(type)) {
-//                if (targetTypes == null || targetTypes.contains(type)) {
-
+            //是否显示Marker
             if (nextDataSet.getValue().isShowMarker()) {
                 if (highLighter.getNearEntriesMap().containsKey(type)) {
                     entries = highLighter.getNearEntriesMap().get(type);
@@ -724,284 +732,91 @@ public class MChart extends View implements OnAnimDataChangeListener {
                 }
                 if (!nextDataSet.getValue().getEntries().isEmpty()) {
                     nearByTempDistance = 20;
+                    nearByTempDistance = nextDataSet.getValue().getFoundNearRange();
+                    //遍历数据
                     for (int i = 0; i < nextDataSet.getValue().getEntries().size(); i++) {
-                        if (nextDataSet.getValue().getEntries().get(i).getX() < tempXAxis.getMin() || nextDataSet.getValue().getEntries().get(i).getX() > tempXAxis.getMax()) {
+                        findEntry = nextDataSet.getValue().getEntries().get(i);
+                        //如果数据点超出边界，跳过
+                        if (findEntry.getX() < tempXAxis.getMin() || findEntry.getX() > tempXAxis.getMax()) {
+                            continue;
+                        }
+                        //如果数据点没有data，跳过
+                        if (findEntry.getData() == null) {
                             continue;
                         }
 
-                        if (nextDataSet.getValue().getEntries().get(i).getData() == null) {
-                            continue;
-                        }
 
-//                                        if (nextDataSet.getValue().getEntries().get(i).getData()==null) {
-//                                            continue;
-//                                        }
-
-                        pX = left + realWidth * (nextDataSet.getValue().getEntries().get(i).getX() - tempXAxis.getMin()) / (tempXAxis.getMax() - tempXAxis.getMin());
+                        //计算数据点X坐标
+                        pX = left + realWidth * (findEntry.getX() - tempXAxis.getMin()) / (tempXAxis.getMax() - tempXAxis.getMin());
+                        //计算数据点Y坐标
                         if (!nextDataSet.getValue().isY2()) {
-                            pY = bottom - nextDataSet.getValue().getEntries().get(i).getY() * realHeight / yAxis.getMax();
+                            pY = bottom - (findEntry.getY() - yAxis.getMin()) * realHeight / (yAxis.getMax() - yAxis.getMin());
                         } else {
-                            pY = bottom - nextDataSet.getValue().getEntries().get(i).getY() * realHeight / y2Axis.getMax();
+                            pY = bottom - (findEntry.getY() - y2Axis.getMin()) * realHeight / (y2Axis.getMax() - y2Axis.getMin());
                         }
-
-
                         curRange = realWidth / (tempXAxis.getMax() - tempXAxis.getMin());
 
-                        if (Math.abs(pX - x) <= realWidth) {
-                            if (nearByTempDistance > Math.abs(pX - x)) {
-//                                                entries.clear();
-                                nextDataSet.getValue().getEntries().get(i).setNearGap(Math.abs(pX - x));
-                                entries.add(nextDataSet.getValue().getEntries().get(i));
-
-//                                                nearByTempDistance = Math.abs(pX - x);
-                                if (Math.abs(pX - x) < nearRange) {
-                                    nearPx = pX;
-                                }
-                            }
+                        //判断不合理结果
+                        if (Math.abs(pX - x) > realWidth) {
+                            continue;
                         }
 
-//                                        if (Math.abs(pX - x) <= Math.min(nextDataSet.getValue().getFoundNearRange(), curRange / 2)) {
-//                                            entries.add(nextDataSet.getValue().getEntries().get(i));
-//
-//                                            if (Math.abs(pX - x) < nearRange) {
-//                                                nearPx = pX;
-//                                            }
-//                                        }
+                        //如果数据点距离触摸点，再判断范围内
+                        if (nearByTempDistance > Math.abs(pX - x)) {
+                            findEntry.setNearGap(Math.abs(pX - x));
+                            findEntry.setPx(pX);
+                            findEntry.setPy(pY);
+                            entries.add(findEntry);
+                        }
                     }
-
-//                                    Log.d(TAG, "findNearbyEntries: " + type + " - " + nextDataSet.getValue().getTag());
                     highLighter.getNearEntriesMap().put(type, entries);
-
-//                            switch (type) {
-//                                case line_fill:
-//                                case line_fill2:
-//                                    nearRange = 50;
-//                                    for (int i = 0; i < nextDataSet.getValue().getEntries().size(); i++) {
-//                                        if (i > 2) {
-//                                            if ((nextDataSet.getValue().getEntries().get(i - 1).getX() < tempXAxis.getMin() && nextDataSet.getValue().getEntries().get(i + 1).getX() < tempXAxis.getMin())
-//                                                    || (nextDataSet.getValue().getEntries().get(i).getX() > tempXAxis.getMax() && nextDataSet.getValue().getEntries().get(i - 1).getX() > tempXAxis.getMax())) {
-//                                                continue;
-//                                            }
-//                                        }
-//
-//                                        pX = left + realWidth * (nextDataSet.getValue().getEntries().get(i).getX() - tempXAxis.getMin()) / (tempXAxis.getMax() - tempXAxis.getMin());
-//                                        if (!nextDataSet.getValue().isY2()) {
-//                                            pY = bottom - nextDataSet.getValue().getEntries().get(i).getY() * realHeight / yAxis.getMax();
-//                                        } else {
-//                                            pY = bottom - nextDataSet.getValue().getEntries().get(i).getY() * realHeight / y2Axis.getMax();
-//                                        }
-//
-//                                        if (nextDataSet.getValue().getEntries().get(i).getData() == null) {
-//                                            continue;
-//                                        }
-//
-//                                        if (Math.abs(pX - x) < nearRange) {
-//                                            if (i == 0) {
-//                                                if (Math.abs(pX - x) < nearRange) {
-//                                                    entries.add(Entry.getNullEntry());
-//                                                    entries.add(nextDataSet.getValue().getEntries().get(i));
-//                                                    nearPx = pX;
-//                                                }
-//                                                continue;
-//                                            } else {
-//                                                if (Math.abs(pX - x) < nearRange) {
-////                                                    entries.add(nextDataSet.getValue().getEntries().get(i - 1));
-//                                                    entries.add(nextDataSet.getValue().getEntries().get(i));
-//                                                    nearPx = pX;
-//                                                }
-//                                            }
-//                                            break;
-//                                        }
-//                                    }
-//                                    highLighter.getNearEntriesMap().put(type, entries);
-//                                    break;
-//                                case bar:
-//                                    nearByTempDistance = realWidth;
-//                                    for (int i = 0; i < nextDataSet.getValue().getEntries().size(); i++) {
-//                                        if (nextDataSet.getValue().getEntries().get(i).getX() < tempXAxis.getMin() || nextDataSet.getValue().getEntries().get(i).getX() > tempXAxis.getMax()) {
-//                                            continue;
-//                                        }
-//                                        pX = left + realWidth * (nextDataSet.getValue().getEntries().get(i).getX() - tempXAxis.getMin()) / (tempXAxis.getMax() - tempXAxis.getMin());
-//                                        if (!nextDataSet.getValue().isY2()) {
-//                                            pY = bottom - nextDataSet.getValue().getEntries().get(i).getY() * realHeight / yAxis.getMax();
-//                                        } else {
-//                                            pY = bottom - nextDataSet.getValue().getEntries().get(i).getY() * realHeight / y2Axis.getMax();
-//                                        }
-//
-//                                        curRange = realWidth / (tempXAxis.getMax() - tempXAxis.getMin());
-//
-////                                    Log.d(TAG, "accept: curRange = " + curRange + ", static range = " + dataSet.getFoundNearRange());
-//
-//                                        if (targetTypes.contains(bitmap)) {
-//                                            if (Math.abs(pX - x) <= realWidth) {
-//                                                if (nearByTempDistance > Math.abs(pX - x)) {
-//                                                    entries.clear();
-//                                                    entries.add(nextDataSet.getValue().getEntries().get(i));
-//                                                    nearByTempDistance = Math.abs(pX - x);
-//                                                    if (Math.abs(pX - x) < nearRange) {
-//                                                        nearPx = pX;
-//                                                    }
-//                                                }
-//                                            }
-//                                        } else {
-//                                            if (Math.abs(pX - x) <= nextDataSet.getValue().getFoundNearRange()) {
-//                                                entries.add(nextDataSet.getValue().getEntries().get(i));
-//
-//                                                if (Math.abs(pX - x) < nearRange) {
-//                                                    nearPx = pX;
-//                                                }
-//                                            }
-//                                        }
-//                                    }
-//                                    highLighter.getNearEntriesMap().put(type, entries);
-//                                    break;
-//                                case point:
-//                                case line:
-//                                    nearByTempDistance = 20;
-//                                    for (int i = 0; i < nextDataSet.getValue().getEntries().size(); i++) {
-//                                        if (nextDataSet.getValue().getEntries().get(i).getX() < tempXAxis.getMin() || nextDataSet.getValue().getEntries().get(i).getX() > tempXAxis.getMax()) {
-//                                            continue;
-//                                        }
-//
-//                                        if (nextDataSet.getValue().getEntries().get(i).getData() == null) {
-//                                            continue;
-//                                        }
-//
-////                                        if (nextDataSet.getValue().getEntries().get(i).getData()==null) {
-////                                            continue;
-////                                        }
-//
-//                                        pX = left + realWidth * (nextDataSet.getValue().getEntries().get(i).getX() - tempXAxis.getMin()) / (tempXAxis.getMax() - tempXAxis.getMin());
-//                                        if (!nextDataSet.getValue().isY2()) {
-//                                            pY = bottom - nextDataSet.getValue().getEntries().get(i).getY() * realHeight / yAxis.getMax();
-//                                        } else {
-//                                            pY = bottom - nextDataSet.getValue().getEntries().get(i).getY() * realHeight / y2Axis.getMax();
-//                                        }
-//
-//
-//                                        curRange = realWidth / (tempXAxis.getMax() - tempXAxis.getMin());
-//
-//                                        if (Math.abs(pX - x) <= realWidth) {
-//                                            if (nearByTempDistance > Math.abs(pX - x)) {
-////                                                entries.clear();
-//                                                nextDataSet.getValue().getEntries().get(i).setNearGap(Math.abs(pX - x));
-//                                                entries.add(nextDataSet.getValue().getEntries().get(i));
-//
-////                                                nearByTempDistance = Math.abs(pX - x);
-//                                                if (Math.abs(pX - x) < nearRange) {
-//                                                    nearPx = pX;
-//                                                }
-//                                            }
-//                                        }
-//
-////                                        if (Math.abs(pX - x) <= Math.min(nextDataSet.getValue().getFoundNearRange(), curRange / 2)) {
-////                                            entries.add(nextDataSet.getValue().getEntries().get(i));
-////
-////                                            if (Math.abs(pX - x) < nearRange) {
-////                                                nearPx = pX;
-////                                            }
-////                                        }
-//                                    }
-//
-////                                    Log.d(TAG, "findNearbyEntries: " + type + " - " + nextDataSet.getValue().getTag());
-//                                    highLighter.getNearEntriesMap().put(type, entries);
-//
-//                                    break;
-//                                case bitmap:
-//                                case range_bar:
-//                                    nearByTempDistance = realWidth;
-//                                    for (int i = 0; i < nextDataSet.getValue().getEntries().size(); i++) {
-//                                        if (nextDataSet.getValue().getEntries().get(i).getX() < tempXAxis.getMin() || nextDataSet.getValue().getEntries().get(i).getX() > tempXAxis.getMax()) {
-//                                            continue;
-//                                        }
-//                                        pX = left + realWidth * (nextDataSet.getValue().getEntries().get(i).getX() - tempXAxis.getMin()) / (tempXAxis.getMax() - tempXAxis.getMin());
-//                                        if (!nextDataSet.getValue().isY2()) {
-//                                            pY = bottom - nextDataSet.getValue().getEntries().get(i).getY() * realHeight / yAxis.getMax();
-//                                        } else {
-//                                            pY = bottom - nextDataSet.getValue().getEntries().get(i).getY() * realHeight / y2Axis.getMax();
-//                                        }
-//
-//                                        if (targetTypes.contains(bitmap)) {
-//                                            if (Math.abs(pX - x) <= realWidth) {
-//                                                if (nearByTempDistance > Math.abs(pX - x)) {
-//                                                    entries.clear();
-//                                                    entries.add(nextDataSet.getValue().getEntries().get(i));
-//                                                    nearByTempDistance = Math.abs(pX - x);
-//                                                    if (Math.abs(pX - x) < nearRange) {
-//                                                        nearPx = pX;
-//                                                    }
-//                                                }
-//                                            }
-//                                        } else {
-//                                            if (Math.abs(pX - x) <= nextDataSet.getValue().getFoundNearRange()) {
-//                                                entries.add(nextDataSet.getValue().getEntries().get(i));
-//                                                if (Math.abs(pX - x) < nearRange) {
-//                                                    nearPx = pX;
-//                                                }
-//                                            }
-//                                        }
-//                                    }
-//                                    highLighter.getNearEntriesMap().put(type, entries);
-//                                    break;
-//                                default:
-//                            }
                 }
             }
-//                }
-//            }
         }
         if (highLighter.getNearEntriesMap().isEmpty()) {
             highLighter.setpX(-1f);
         } else {
-            Iterator<DataType> nearbyIterator = highLighter.getNearEntriesMap().keySet().iterator();
-            nearbyFilterRange = nearRange;
-            selectDataType = null;
-            selectEntries = new LinkedList<>();
-            nearestMap = new ConcurrentHashMap<>();
-            while (nearbyIterator.hasNext()) {
-                DataType nearbyDataType = nearbyIterator.next();
-                for (int i = 0; i < highLighter.getNearEntriesMap().get(nearbyDataType).size(); i++) {
-
-//                    synchronized (nearestMap) {
-                    nearestMap = getNearestDataMap(nearestMap, highLighter.getNearEntriesMap().get(nearbyDataType));
-//                    }
-
-//                    pX = left + (highLighter.getNearEntriesMap().get(nearbyDataType).get(i).getX() - tempXAxis.getMin()) * realWidth / (tempXAxis.getMax() - tempXAxis.getMin());
-////                    if(Math.abs(highLighter.getNearEntriesMap().get(nearbyDataType).get(i).getX() - x)<nearbyFilterRange) {
-//                    if (Math.abs(pX - x) < nearbyFilterRange) {
-//                        selectDataType = nearbyDataType;
-//                        nearbyFilterRange = Math.abs(pX - x);
-//                        //notice 根据entry tag找出其中最少的
-//                        nearestMap = getNearestDataMap();
-//                        selectEntries.clear();
-//                        selectEntries.add(highLighter.getNearEntriesMap().get(nearbyDataType).get(i));
-//                    }
-                }
-            }
-
-            highLighter.getNearEntriesMap().clear();
-//            highLighter.setNearEntriesMap(analysisNeedHighlightData(highLighter.getNearEntriesMap(), nearestMap));
-            highLighter.setNearEntriesMap(analysisNeedHighlightData(highLighter.getNearEntriesMap(), nearestMap));
             if (!highLighter.getNearEntriesMap().isEmpty()) {
-                if (touchDown) {
-                    highLighter.setpX(nearPx);
-                } else {
-                    highLighter.setpX(x);
+                switch (hightlightMode) {
+                    case adsorption:
+                        //如果是自动吸附模式
+                        Pair<DataType, LinkedList<Entry>> dataTypeEntryPair = analysisAdsorptionEntry();
+                        highLighter.getNearEntriesMap().clear();
+                        if (dataTypeEntryPair != null) {
+                            highLighter.setpX(dataTypeEntryPair.second.getFirst().getPx());
+                            highLighter.getNearEntriesMap().put(dataTypeEntryPair.first, dataTypeEntryPair.second);
+                            needShowHighlight = true;
+                        }
+                        break;
+                    case desorption:
+                        //如果是自选模式
+                        highLighter.setpX(nearPx);
+                        needShowHighlight = true;
+                        break;
                 }
-                needShowHighlight = true;
             }
-
-
-//            highLighter.setpX(nearPx);
-//            highLighter.getNearEntriesMap().clear();
-//            if (selectDataType != null) {
-//                highLighter.getNearEntriesMap().put(selectDataType, selectEntries);
-////                pX = left + (selectEntries.getFirst().getX() - tempXAxis.getMin()) * realWidth / (tempXAxis.getMax() - tempXAxis.getMin());
-//                highLighter.setpX(x);
-//                needShowHighlight = true;
-//            }
-//            highLighter.setpX(nearPx);
         }
+    }
+
+    private Pair<DataType, LinkedList<Entry>> analysisAdsorptionEntry() {
+        HashMap<DataType, LinkedList<Entry>> nearEntriesMap = highLighter.getNearEntriesMap();
+        float nearGap = 10000;
+        DataType nearestDataType = null;
+        Entry nearestEntry = null;
+        for (DataType dataType : nearEntriesMap.keySet()) {
+            LinkedList<Entry> entries = nearEntriesMap.get(dataType);
+            for (Entry entry : entries) {
+                if (nearGap > entry.getNearGap()) {
+                    nearGap = entry.getNearGap();
+                    nearestDataType = dataType;
+                    nearestEntry = entry;
+                }
+            }
+        }
+        if (nearestDataType == null || nearestEntry == null) return null;
+        LinkedList<Entry> linkedList = new LinkedList<>();
+        linkedList.add(nearestEntry);
+        return new Pair<>(nearestDataType, linkedList);
     }
 
     private HashMap<DataType, LinkedList<Entry>> analysisNeedHighlightData(HashMap<DataType, LinkedList<Entry>> selectedMap, ConcurrentHashMap<String, Entry> nearestMap) {
@@ -1146,187 +961,26 @@ public class MChart extends View implements OnAnimDataChangeListener {
             }
         }
 
-        drawHighlight(canvas);
+        drawHighlightAndMarker(canvas);
     }
 
-    private void drawHighlight(Canvas canvas) {
+    private void drawHighlightAndMarker(Canvas canvas) {
         markerHeight = 0;
         if (needShowHighlight) {
             //绘制marker
             if (highLighter.getpX() != -1f && highLighter.getNearEntriesMap() != null) {
-                canvas.drawLine(highLighter.getpX(), bottom, highLighter.getpX(), top, highLightPaint);
+                highlightBuilder.drawHighlight(canvas, highLighter.getpX(), new ViewportInfo(left, top, right, bottom));
                 if (!highLighter.getNearEntriesMap().isEmpty()) {
                     markerTextArr.clear();
                     nearByEntriesIterator = highLighter.getNearEntriesMap().entrySet().iterator();
                     while (nearByEntriesIterator.hasNext()) {
                         nextNearbyEntries = nearByEntriesIterator.next();
                         entries = nextNearbyEntries.getValue();
-                        switch (nextNearbyEntries.getKey()) {
-                            case line:
-                            case line_fill:
-                            case line_fill2:
-                            case point:
-                            case bar:
-                            case bitmap:
-                            case range_bar:
-                            case SinglePoint:
-                            case DoublePoint:
-                            case TriplePoint:
-                            case QuatraPoint:
-                            case CurveSingle:
-                            case CurveDouble:
-                                for (int i = 0; i < entries.size(); i++) {
-                                    markerHeight += markerBuilder.builderMarker(canvas,entries.get(i),highLighter.getpX(),markerHeight,new ViewportInfo(left, top, right, bottom));
-//                                    if (entries.get(i).getData() instanceof String) {
-//                                        if (((String) entries.get(i).getData()).isEmpty()) continue;
-//                                        markerSb.setLength(0);
-//                                        markerSb.append(entries.get(i).getData());
-//                                        markerTextArr.add(new Pair<>(entries.get(i).getHighlightColor(getContext()), markerSb.toString()));
-//                                    } else if (entries.get(i).getData() instanceof String[]) {
-//                                        if (((String[]) entries.get(i).getData()) == null) continue;
-//                                        for (int j = 0; j < ((String[]) entries.get(i).getData()).length; j++) {
-//                                            markerSb.setLength(0);
-//                                            markerSb.append(((String[]) entries.get(i).getData())[j]);
-//                                            markerTextArr.add(new Pair<>(entries.get(i).getHighlightColor(getContext()), markerSb.toString()));
-//                                        }
-//                                    }
-                                }
-                                break;
-                            default:
-                        }
+
+                        markerHeight += markerBuilder.builderMarker(canvas, nextNearbyEntries.getKey(), entries, highLighter.getpX(), markerHeight, new ViewportInfo(left, top, right, bottom));
                     }
-
-//                    isHighLeft = highLighter.getpX() <= left + realWidth / 2;
-//
-//                    if (markerTextArr.isEmpty()) {
-////                    Log.d(TAG, "onDraw: 01");
-//                        markerFrame.set(
-//                                highLighter.getpX() + (isHighLeft ? 0 : -maxMarkerWidth),
-//                                top,
-//                                highLighter.getpX() + (isHighLeft ? maxMarkerWidth : 0),
-//                                top + 120);
-//                        canvas.drawRect(markerFrame, markerPaint);
-//                    } else {
-////                    Log.d(TAG, "onDraw: 02");
-//                        markerTTop = top;
-//                        markerTBottom = top;
-//                        for (int i = 0; i < markerTextArr.size(); i++) {
-//                            synchronized (MChart.this) {
-//                                if (i % 2 == 0) {
-//                                    markerTTop = markerTBottom;
-//                                    markerTBottom += isShowSgChart ? 40 : 60;
-//                                } else {
-//                                    markerTTop = markerTBottom;
-//                                    markerTBottom += 60;
-//                                }
-//                            }
-////                            Log.d(TAG, "onDraw: isHIghLeft= " + isHighLeft);
-////                            Log.d(TAG, "onDraw("+i+") called with: markerTTop = [" + markerTTop + "]"+" markerTBottom = [" + markerTBottom + "]");
-//
-//                            maxMarkerWidth = 200;
-//                            for (int i1 = 0; i1 < markerTextArr.size(); i1++) {
-//                                Rect rect = new Rect();
-//                                markerTLPaint.getTextBounds(markerTextArr.get(i1).second, 0, markerTextArr.get(i1).second.length(), rect);
-//                                int w = rect.width();
-//                                if (rect.width() > maxMarkerWidth) {
-//                                    maxMarkerWidth = rect.width();
-//                                }
-//                            }
-//
-//                            maxMarkerWidth += 20;
-//
-//                            markerFrame.set(
-//                                    highLighter.getpX() + (isHighLeft ? 0 : -maxMarkerWidth),
-////                                    i == 0 ? top : (top + 40 * (i + 1)),
-//                                    markerTTop,
-//                                    highLighter.getpX() + (isHighLeft ? maxMarkerWidth : 0),
-//                                    markerTBottom);
-//                            markerPaint.setColor(ContextCompat.getColor(getContext(), R.color.color_main));
-//                            markerPaint.setColor(markerTextArr.get(i).first);
-//                            canvas.drawRect(markerFrame, markerPaint);
-//                        }
-//                    }
-//
-//
-//                    for (int i = 0; i < markerTextArr.size(); i++) {
-//                        curMarkerText = markerTextArr.get(i).second;
-//                        isUnderLine = curMarkerText.startsWith("[u]");
-//                        if (isUnderLine) curMarkerText = curMarkerText.replace("[u]", "");
-//                        canvas.drawText(curMarkerText, highLighter.getpX() + (isHighLeft ? 0 : -maxMarkerWidth), top + ((i + 1) * (isShowSgChart ? 40 : 50)), i % 2 == 0
-//                                ? (isShowSgChart
-//                                ? markerTPaint
-//                                : (isUnderLine ? markerTLUPaint : markerTLPaint))
-//                                : (isUnderLine ? markerTLUPaint : markerTLPaint));
-//
-//                    }
-//                    lastMarkerTextArr = markerTextArr;
-//                    lastMarkerPx = highLighter.getpX();
-
-
-//                Log.d(TAG, "onDraw: ");
-
                 }
             }
-//            else {
-//                if (lastMarkerTextArr != null && lastMarkerTextArr.size() > 0) {
-//
-//                    canvas.drawLine(lastMarkerPx, bottom, lastMarkerPx, top, borderPaint);
-//
-//                    if (lastMarkerTextArr.isEmpty()) {
-////                    Log.d(TAG, "onDraw: 11");
-//                        markerFrame.set(
-//                                lastMarkerPx + (isHighLeft ? 0 : -maxMarkerWidth),
-//                                top,
-//                                lastMarkerPx + (isHighLeft ? maxMarkerWidth : 0),
-//                                top + 120);
-//                        canvas.drawRect(markerFrame, markerPaint);
-//                    } else {
-////                    Log.d(TAG, "onDraw: 11");
-//                        markerTTop = top;
-//                        markerTBottom = top;
-//                        for (int i = 0; i < markerTextArr.size(); i++) {
-//                            if (i % 2 == 0) {
-//                                markerTTop = markerTBottom;
-//                                markerTBottom += isShowSgChart ? 40 : 60;
-//                            } else {
-//                                markerTTop = markerTBottom;
-//                                markerTBottom += 60;
-//                            }
-//
-//
-//                            maxMarkerWidth = 200;
-//                            for (int i1 = 0; i1 < lastMarkerTextArr.size(); i1++) {
-//                                Rect rect = new Rect();
-//                                markerTLPaint.getTextBounds(lastMarkerTextArr.get(i1).second, 0, lastMarkerTextArr.get(i1).second.length(), rect);
-//                                int w = rect.width();
-//                                if (rect.width() > maxMarkerWidth) {
-//                                    maxMarkerWidth = rect.width();
-//                                }
-//                            }
-//
-//                            maxMarkerWidth += 20;
-//
-//                            markerFrame.set(
-//                                    lastMarkerPx + (isHighLeft ? 0 : -maxMarkerWidth),
-////                                    i == 0 ? top : (top + 40 * (i + 1)),
-//                                    markerTTop,
-//                                    lastMarkerPx + (isHighLeft ? maxMarkerWidth : 0),
-//                                    markerTBottom);
-//                            canvas.drawRect(markerFrame, markerPaint);
-//                        }
-//                    }
-//
-//                    for (int i = 0; i < lastMarkerTextArr.size(); i++) {
-//                        curMarkerText = lastMarkerTextArr.get(i).second;
-//                        isUnderLine = curMarkerText.startsWith("[u]");
-//                        if (isUnderLine) curMarkerText = curMarkerText.replace("[u]", "");
-//                        canvas.drawText(curMarkerText, lastMarkerPx + (isHighLeft ? 0 : -maxMarkerWidth), top + ((i + 1) * (isShowSgChart ? 40 : 50)), i % 2 == 0 ?
-//                                (isShowSgChart ? markerTPaint : (isUnderLine ? markerTLUPaint : markerTLPaint))
-//                                : (isUnderLine ? markerTLUPaint : markerTLPaint));
-//                    }
-//
-//                }
-//            }
         }
     }
 
@@ -1505,6 +1159,24 @@ public class MChart extends View implements OnAnimDataChangeListener {
             if (nextDataSet.getValue().getEntryDrafter() != null)
                 nextDataSet.getValue().getEntryDrafter().drawSingleEntry(canvas, i, new PXY(pX, pY), new ViewportInfo(left, top, right, bottom));
 
+            checkNeedDrawHighlightEntry(canvas, i, nextDataSet.getValue(), nextDataSet.getValue().getEntries().get(i), new PXY(pX, pY), new ViewportInfo(left, top, right, bottom));
+
+        }
+    }
+
+    private void checkNeedDrawHighlightEntry(Canvas canvas, int index, DataSet dataSet, Entry entry, PXY pxy, ViewportInfo viewportInfo) {
+        if (needShowHighlight) {
+            for (DataType dataType : highLighter.getNearEntriesMap().keySet()) {
+                LinkedList<Entry> highLightEntries = highLighter.getNearEntriesMap().get(dataType);
+                if (highLightEntries == null) continue;
+                for (Entry highLightEntry : highLightEntries) {
+                    if (entry.equals(highLightEntry)) {
+                        if (dataSet.getEntryDrafter() != null)
+                            dataSet.drawHighlightEntry(canvas, index, pxy, viewportInfo);
+                    }
+                }
+
+            }
         }
     }
 
@@ -1540,6 +1212,10 @@ public class MChart extends View implements OnAnimDataChangeListener {
             if (nextDataSet.getValue().getEntryDrafter() != null)
                 nextDataSet.getValue().getEntryDrafter().drawDoubleEntry(canvas, i, new PXY(pX0, pY0), new PXY(pX1, pY1), new ViewportInfo(left, top, right, bottom));
 
+            checkNeedDrawHighlightEntry(canvas, i, nextDataSet.getValue(), nextDataSet.getValue().getEntries().get(i), new PXY(pX0, pY0), new ViewportInfo(left, top, right, bottom));
+            if (i == nextDataSet.getValue().getEntries().size() - 2) {
+                checkNeedDrawHighlightEntry(canvas, i + 1, nextDataSet.getValue(), nextDataSet.getValue().getEntries().get(i), new PXY(pX1, pY1), new ViewportInfo(left, top, right, bottom));
+            }
         }
     }
 
@@ -1713,8 +1389,7 @@ public class MChart extends View implements OnAnimDataChangeListener {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 
-        setMeasuredDimension(measureWidth(widthMeasureSpec),
-                measureHeight(heightMeasureSpec));
+        setMeasuredDimension(measureWidth(widthMeasureSpec), measureHeight(heightMeasureSpec));
 
     }
 

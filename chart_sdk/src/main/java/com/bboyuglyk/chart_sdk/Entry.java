@@ -7,7 +7,9 @@ import androidx.core.content.ContextCompat;
 
 public class Entry {
     private float x;
+    private float px;
     private float y;
+    private float py;
     private float y2;
     private float[] yValues;
     private Object data;
@@ -120,6 +122,22 @@ public class Entry {
         this.y2 = y2;
     }
 
+    public float getPx() {
+        return px;
+    }
+
+    public void setPx(float px) {
+        this.px = px;
+    }
+
+    public float getPy() {
+        return py;
+    }
+
+    public void setPy(float py) {
+        this.py = py;
+    }
+
     public Object getData() {
         return data;
     }
@@ -145,6 +163,32 @@ public class Entry {
 
     public void setHighlightColor(int highlightColor) {
         this.highlightColor = highlightColor;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Entry entry = (Entry) o;
+
+        if (Float.compare(entry.x, x) != 0) return false;
+        if (Float.compare(entry.px, px) != 0) return false;
+        if (Float.compare(entry.y, y) != 0) return false;
+        if (Float.compare(entry.y2, y2) != 0) return false;
+        if (tag != null ? !tag.equals(entry.tag) : entry.tag != null) return false;
+        return dataType == entry.dataType;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = (x != +0.0f ? Float.floatToIntBits(x) : 0);
+        result = 31 * result + (px != +0.0f ? Float.floatToIntBits(px) : 0);
+        result = 31 * result + (y != +0.0f ? Float.floatToIntBits(y) : 0);
+        result = 31 * result + (y2 != +0.0f ? Float.floatToIntBits(y2) : 0);
+        result = 31 * result + (tag != null ? tag.hashCode() : 0);
+        result = 31 * result + (dataType != null ? dataType.hashCode() : 0);
+        return result;
     }
 
     @Override

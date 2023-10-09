@@ -9,6 +9,7 @@ import android.os.Bundle;
 import com.bboyuglyk.chart_sdk.BaseAxis;
 import com.bboyuglyk.chart_sdk.ChartDataKeyMap;
 import com.bboyuglyk.chart_sdk.Entry;
+import com.bboyuglyk.chart_sdk.HightlightMode;
 import com.bboyuglyk.chart_sdk.ILabelFormatter;
 import com.bboyuglyk.chart_sdk.MChart;
 import com.bboyuglyk.mchart.new_dataset.CurveLineDataSet;
@@ -78,7 +79,7 @@ public class LineActivity extends AppCompatActivity {
         linDataSet.setLineColor(ContextCompat.getColor(LineActivity.this,R.color.teal_200));
         lineChart.addAnimDataSet(linDataSet);
 
-        LineDataSet linDataSet2 = new LineDataSet(LineActivity.this, ChartDataKeyMap.SG_GLUCOSE, entries2);
+        PointDataSet linDataSet2 = new PointDataSet(LineActivity.this, ChartDataKeyMap.SG_GLUCOSE, entries2);
         linDataSet2.setLineColor(ContextCompat.getColor(LineActivity.this,R.color.purple_500));
         lineChart.addAnimDataSet(linDataSet2);
 
@@ -112,7 +113,13 @@ public class LineActivity extends AppCompatActivity {
         chart.setGridColor(ContextCompat.getColor(LineActivity.this,R.color.white));
         //设置边框颜色
         chart.setBorderColor(Color.YELLOW);
-        chart.setMarkerBuilder(new MMarkerBuilder(LineActivity.this));
+        //设置Marker构造器
+        chart.setMarkerBuilder(new MMarkerBuilder2(LineActivity.this));
+        //设置highlight寻找模式
+        chart.setHightlightMode(HightlightMode.desorption);
+        //设置Highlight构造器
+        chart.setHighlightBuilder(new MHighlightBuilder(LineActivity.this));
+        //构建X轴坐标
         BaseAxis xAxis = new BaseAxis();
         xAxis.setMin(0);
         xAxis.setMax(2000);
@@ -126,6 +133,7 @@ public class LineActivity extends AppCompatActivity {
 
         chart.setxAxis(xAxis);
 
+        //构建Y轴坐标
         BaseAxis yAxis = new BaseAxis();
         yAxis.setMin(27);
         yAxis.setMidCount(7);
@@ -141,6 +149,7 @@ public class LineActivity extends AppCompatActivity {
 
         chart.setyAxis(yAxis);
 
+        //构建Y轴2坐标
         BaseAxis y2Axis = new BaseAxis();
         y2Axis.setMin(0);
         y2Axis.setMidCount(4);

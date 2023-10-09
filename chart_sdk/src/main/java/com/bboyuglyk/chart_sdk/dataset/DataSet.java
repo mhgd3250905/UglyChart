@@ -34,6 +34,8 @@ public abstract class DataSet implements IEntryDrafter {
     protected IEntryDrafter entryDrafter;
     //tip 画笔
     protected Paint paint;
+    //tip Highlight画笔
+    protected Paint highlightPaint;
     //tip 是否可以显示到marker
     protected boolean showMarker;
     protected boolean isY2;
@@ -134,6 +136,14 @@ public abstract class DataSet implements IEntryDrafter {
         this.paint = paint;
     }
 
+    public Paint getHighlightPaint() {
+        return highlightPaint;
+    }
+
+    public void setHighlightPaint(Paint highlightPaint) {
+        this.highlightPaint = highlightPaint;
+    }
+
     public boolean isShowMarker() {
         return showMarker;
     }
@@ -199,6 +209,11 @@ public abstract class DataSet implements IEntryDrafter {
 
     @Override
     public void drawQuatraEntry(Canvas canvas, int index, PXY p1, PXY p2, PXY p3, PXY p4, ViewportInfo viewportInfo) {
+
+    }
+
+    @Override
+    public void drawHighlightEntry(Canvas canvas, int index, PXY p, ViewportInfo viewportInfo) {
 
     }
 

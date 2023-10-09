@@ -5,11 +5,14 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 
+import androidx.core.content.ContextCompat;
+
 import com.bboyuglyk.chart_sdk.DataType;
 import com.bboyuglyk.chart_sdk.Entry;
 import com.bboyuglyk.chart_sdk.PXY;
 import com.bboyuglyk.chart_sdk.ViewportInfo;
 import com.bboyuglyk.chart_sdk.dataset.SingleDataSet;
+import com.bboyuglyk.mchart.R;
 
 import java.util.LinkedList;
 
@@ -32,6 +35,15 @@ public class PointDataSet extends SingleDataSet {
         paint.setColor(Color.WHITE);//线条粗细
         setPaint(paint);
         setShowMarker(true);
+
+
+        Paint highlightPaint = new Paint();
+        highlightPaint.setAntiAlias(true);//设置抗锯齿
+        highlightPaint.setStyle(Paint.Style.STROKE);//实心
+        highlightPaint.setStrokeWidth(5f);//线条粗细
+        highlightPaint.setColor(ContextCompat.getColor(context, R.color.high_light_shadow_color));//线条粗细
+        highlightPaint.setShadowLayer(20f,0f,0f, ContextCompat.getColor(context, R.color.high_light_shadow_color));
+        setHighlightPaint(highlightPaint);
     }
 
 
@@ -58,8 +70,14 @@ public class PointDataSet extends SingleDataSet {
         canvas.drawCircle(p.getX(), p.getY(), radius, paint);
     }
 
+
+    @Override
+    public void drawHighlightEntry(Canvas canvas, int index, PXY p, ViewportInfo viewportInfo) {
+        canvas.drawCircle(p.x, p.y, 15f, highlightPaint);
+    }
+
     @Override
     public float getFoundNearRange() {
-        return radius;
+        return 40f;
     }
 }
