@@ -29,6 +29,10 @@ To get a Git project into your build:
 
 
 
+[使用说明](/README_ABOUT.md)
+
+
+
 - [x] 平滑曲线
 - [x] 数据更换动画效果
 - [x]  曲线填充
