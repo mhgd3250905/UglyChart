@@ -4,25 +4,36 @@ import android.graphics.Canvas;
 
 public interface IEntryDrafter {
 
+    /**
+     * 绘制单个数据点
+     * @param canvas 画布
+     * @param index 序号
+     * @param p 数据坐标
+     * @param viewportInfo 图表参数
+     */
     void drawSingleEntry(Canvas canvas, int index, PXY p, ViewportInfo viewportInfo);
 
+    /**
+     * 绘制2个数据点
+     * @param canvas
+     * @param index 第一个数据序号
+     * @param p1
+     * @param p2
+     * @param viewportInfo
+     */
     void drawDoubleEntry(Canvas canvas, int index, PXY p1, PXY p2, ViewportInfo viewportInfo);
 
     void drawTripleEntry(Canvas canvas, int index, PXY p1, PXY p2, PXY p3, ViewportInfo viewportInfo);
 
     void drawQuatraEntry(Canvas canvas, int index, PXY p1, PXY p2, PXY p3, PXY p4, ViewportInfo viewportInfo);
 
+    /**
+     * 绘制数据被选中时的样式
+     * @param canvas
+     * @param index 数据序号
+     * @param p 坐标
+     * @param viewportInfo 图表信息
+     */
     void drawHighlightEntry(Canvas canvas, int index, PXY p, ViewportInfo viewportInfo);
-
-    void drawPointEntry(Canvas canvas, float x, float y, float left, float top, float right, float bottom);
-
-    void drawRectEntry(Canvas canvas, float rLeft, float rTop, float rRight, float rBottom, float left, float top, float right, float bottom);
-
-    void drawLineEntry(Canvas canvas, float fromX, float fromY, float toX, float toY, float left, float top, float right, float bottom);
-
-    void drawComposeRect(Canvas canvas, float left, float top, float right, float bottom, float x, float maxY, float... midY);
-
-    void drawRangeBar(Canvas canvas, float x, float y, float left, float top, float right, float bottom, float range);
-
 
 }
