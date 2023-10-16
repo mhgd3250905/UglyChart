@@ -18,6 +18,9 @@
             android:name=".BarActivity"
             android:exported="false" />
         <activity
+            android:name=".PieActivity"
+            android:exported="false" />
+        <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>

@@ -60,10 +60,6 @@ public class PointDataSet extends SingleDataSet {
         this.radius = radius;
     }
 
-    @Override
-    public void drawPointEntry(Canvas canvas, float x, float y, float left, float top, float right, float bottom) {
-        canvas.drawCircle(x, y, radius, paint);
-    }
 
     @Override
     public void drawSingleEntry(Canvas canvas,int index, PXY p, ViewportInfo viewportInfo) {

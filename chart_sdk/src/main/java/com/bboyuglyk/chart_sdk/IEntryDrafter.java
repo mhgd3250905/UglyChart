@@ -28,6 +28,14 @@ public interface IEntryDrafter {
     void drawQuatraEntry(Canvas canvas, int index, PXY p1, PXY p2, PXY p3, PXY p4, ViewportInfo viewportInfo);
 
     /**
+     * 绘制饼图
+     * @param canvas
+     * @param viewportInfo
+     * @param entries 饼图数据
+     */
+    void drawPieEntries(Canvas canvas, ViewportInfo viewportInfo, PXY touchP, Entry ...entries);
+
+    /**
      * 绘制数据被选中时的样式
      * @param canvas
      * @param index 数据序号
@@ -35,5 +43,6 @@ public interface IEntryDrafter {
      * @param viewportInfo 图表信息
      */
     void drawHighlightEntry(Canvas canvas, int index, PXY p, ViewportInfo viewportInfo);
+
 
 }

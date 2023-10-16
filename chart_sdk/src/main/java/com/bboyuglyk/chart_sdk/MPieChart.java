@@ -29,8 +29,6 @@ import com.bboyuglyk.chart_sdk.dataset.DataSetBox;
 import com.bboyuglyk.chart_sdk.dataset.OnAnimDataChangeListener;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -41,7 +39,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 
-public class MChart extends View implements OnAnimDataChangeListener {
+public class MPieChart extends View implements OnAnimDataChangeListener {
     private static final String TAG = "MChart";
 
 
@@ -88,6 +86,8 @@ public class MChart extends View implements OnAnimDataChangeListener {
     private MarkerBuilder markerBuilder;
 
     private IHighlightBuilder highlightBuilder;
+    //notice 饼图触摸坐标
+    private PXY touchPXY;
 
     public void setHighlightBuilder(IHighlightBuilder highlightBuilder) {
         this.highlightBuilder = highlightBuilder;
@@ -304,17 +304,17 @@ public class MChart extends View implements OnAnimDataChangeListener {
         this.priorityHelper = priorityHelper;
     }
 
-    public MChart(Context context) {
+    public MPieChart(Context context) {
         super(context);
         init();
     }
 
-    public MChart(Context context, @Nullable AttributeSet attrs) {
+    public MPieChart(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         init();
     }
 
-    public MChart(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    public MPieChart(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         init();
     }
@@ -721,141 +721,9 @@ public class MChart extends View implements OnAnimDataChangeListener {
      * @param touchDown
      */
     private void findNearbyEntries(float x, float y, boolean touchDown) {
+        needShowHighlight = true;
 //        Log.d(TAG, "findNearbyEntries() called with: x = [" + x + "], y = [" + y + "], touchDown = [" + touchDown + "]");
-        nearRange = 10000;
-        nearPx = x;
-        highLighter.getNearEntriesMap().clear();
-        dataSetIterator = dataSetBox.getDataSetMap().entrySet().iterator();
-        while (dataSetIterator.hasNext()) {
-            nextDataSet = dataSetIterator.next();
-            type = nextDataSet.getValue().getType();
-            //是否显示Marker
-            if (nextDataSet.getValue().isShowMarker()) {
-                if (highLighter.getNearEntriesMap().containsKey(type)) {
-                    entries = highLighter.getNearEntriesMap().get(type);
-                } else {
-                    entries = new LinkedList<>();
-                }
-                if (!nextDataSet.getValue().getEntries().isEmpty()) {
-                    nearByTempDistance = 20;
-                    nearByTempDistance = nextDataSet.getValue().getFoundNearRange();
-                    //遍历数据
-                    for (int i = 0; i < nextDataSet.getValue().getEntries().size(); i++) {
-                        findEntry = nextDataSet.getValue().getEntries().get(i);
-                        //如果数据点超出边界，跳过
-                        if (findEntry.getX() < tempXAxis.getMin() || findEntry.getX() > tempXAxis.getMax()) {
-                            continue;
-                        }
-                        //如果数据点没有data，跳过
-                        if (findEntry.getData() == null) {
-                            continue;
-                        }
-
-
-                        //计算数据点X坐标
-                        pX = left + realWidth * (findEntry.getX() - tempXAxis.getMin()) / (tempXAxis.getMax() - tempXAxis.getMin());
-                        //计算数据点Y坐标
-                        if (!nextDataSet.getValue().isY2()) {
-                            pY = bottom - (findEntry.getY() - yAxis.getMin()) * realHeight / (yAxis.getMax() - yAxis.getMin());
-                        } else {
-                            pY = bottom - (findEntry.getY() - y2Axis.getMin()) * realHeight / (y2Axis.getMax() - y2Axis.getMin());
-                        }
-                        curRange = realWidth / (tempXAxis.getMax() - tempXAxis.getMin());
-
-                        //判断不合理结果
-                        if (Math.abs(pX - x) > realWidth) {
-                            continue;
-                        }
-
-                        //如果数据点距离触摸点，再判断范围内
-                        if (nearByTempDistance > Math.abs(pX - x)) {
-                            findEntry.setNearGap(Math.abs(pX - x));
-                            findEntry.setPx(pX);
-                            findEntry.setPy(pY);
-                            entries.add(findEntry);
-                        }
-                    }
-                    highLighter.getNearEntriesMap().put(type, entries);
-                }
-            }
-        }
-        if (highLighter.getNearEntriesMap().isEmpty()) {
-            highLighter.setpX(-1f);
-        } else {
-            if (!highLighter.getNearEntriesMap().isEmpty()) {
-                switch (hightlightMode) {
-                    case adsorption:
-                        //如果是自动吸附模式
-                        Pair<DataType, LinkedList<Entry>> dataTypeEntryPair = analysisAdsorptionEntry();
-                        highLighter.getNearEntriesMap().clear();
-                        if (dataTypeEntryPair != null) {
-                            highLighter.setpX(dataTypeEntryPair.second.getFirst().getPx());
-                            highLighter.getNearEntriesMap().put(dataTypeEntryPair.first, dataTypeEntryPair.second);
-                            needShowHighlight = true;
-                        }
-                        break;
-                    case desorption:
-                        //如果是自选模式
-                        highLighter.setpX(nearPx);
-                        needShowHighlight = true;
-                        break;
-                }
-            }
-        }
-    }
-
-    private Pair<DataType, LinkedList<Entry>> analysisAdsorptionEntry() {
-        HashMap<DataType, LinkedList<Entry>> nearEntriesMap = highLighter.getNearEntriesMap();
-        float nearGap = 10000;
-        DataType nearestDataType = null;
-        Entry nearestEntry = null;
-        for (DataType dataType : nearEntriesMap.keySet()) {
-            LinkedList<Entry> entries = nearEntriesMap.get(dataType);
-            for (Entry entry : entries) {
-                if (nearGap > entry.getNearGap()) {
-                    nearGap = entry.getNearGap();
-                    nearestDataType = dataType;
-                    nearestEntry = entry;
-                }
-            }
-        }
-        if (nearestDataType == null || nearestEntry == null) return null;
-        LinkedList<Entry> linkedList = new LinkedList<>();
-        linkedList.add(nearestEntry);
-        return new Pair<>(nearestDataType, linkedList);
-    }
-
-    private HashMap<DataType, LinkedList<Entry>> analysisNeedHighlightData(HashMap<DataType, LinkedList<Entry>> selectedMap, ConcurrentHashMap<String, Entry> nearestMap) {
-        for (Entry entry : nearestMap.values()) {
-            if (entry.getDataType() == null) continue;
-            if (selectedMap.containsKey(entry.getDataType())) {
-                if (selectedMap.get(entry.getDataType()).getFirst().getNearGap() > entry.getNearGap()) {
-                    selectedMap.get(entry.getDataType()).set(0, entry);
-                }
-            } else {
-                LinkedList<Entry> tempEntires = new LinkedList<>();
-                tempEntires.add(entry);
-                selectedMap.put(entry.getDataType(), tempEntires);
-            }
-        }
-        return selectedMap;
-    }
-
-//    private ConcurrentHashMap<String, Entry> getNearestDataMap() {
-//    }
-
-    private ConcurrentHashMap<String, Entry> getNearestDataMap(ConcurrentHashMap<String, Entry> nearestMap, LinkedList<Entry> entries) {
-        for (Entry entry : entries) {
-            if (entry.getTag() == null) continue;
-            if (nearestMap.containsKey(entry.getTag())) {
-                if (nearestMap.get(entry.getTag()).getNearGap() > entry.getNearGap()) {
-                    nearestMap.put(entry.getTag(), entry);
-                }
-            } else {
-                nearestMap.put(entry.getTag(), entry);
-            }
-        }
-        return nearestMap;
+        this.touchPXY = new PXY(x, y);
     }
 
     public void resetBaseInfo() {
@@ -918,7 +786,7 @@ public class MChart extends View implements OnAnimDataChangeListener {
 
         borderPaint.setColor(borderColor);
         frame.set(0 + leftMargin, 0 + topMargin, width - rightMargin, height - bottomMargin);
-        if(showBorder) {
+        if (showBorder) {
             //notice 绘制边框
             canvas.drawRect(frame, borderPaint);
         }
@@ -960,6 +828,9 @@ public class MChart extends View implements OnAnimDataChangeListener {
                     case CurveDouble:
                         drawDoublePoint(canvas);
                         break;
+                    case Pie:
+                        drawPiesPoint(canvas);
+                        break;
                     default:
                         drawSinglePoint(canvas);
                 }
@@ -970,23 +841,15 @@ public class MChart extends View implements OnAnimDataChangeListener {
         drawHighlightAndMarker(canvas);
     }
 
+    public void setNeedShowHighlight(boolean needShowHighlight) {
+        this.needShowHighlight = needShowHighlight;
+    }
+
     private void drawHighlightAndMarker(Canvas canvas) {
         markerHeight = 0;
         if (needShowHighlight) {
             //绘制marker
-            if (highLighter.getpX() != -1f && highLighter.getNearEntriesMap() != null) {
-                highlightBuilder.drawHighlight(canvas, highLighter.getpX(), new ViewportInfo(left, top, right, bottom));
-                if (!highLighter.getNearEntriesMap().isEmpty()) {
-                    markerTextArr.clear();
-                    nearByEntriesIterator = highLighter.getNearEntriesMap().entrySet().iterator();
-                    while (nearByEntriesIterator.hasNext()) {
-                        nextNearbyEntries = nearByEntriesIterator.next();
-                        entries = nextNearbyEntries.getValue();
-
-                        markerHeight += markerBuilder.builderMarker(canvas, nextNearbyEntries.getKey(), entries, highLighter.getpX(), markerHeight, new ViewportInfo(left, top, right, bottom));
-                    }
-                }
-            }
+            highlightBuilder.drawHighlight(canvas, this.touchPXY, new ViewportInfo(left, top, right, bottom));
         }
     }
 
@@ -1319,12 +1182,16 @@ public class MChart extends View implements OnAnimDataChangeListener {
         }
     }
 
-//    private void drawPiesPoint(Canvas canvas) {
-//        Entry[] entryArrs = nextDataSet.getValue().getEntries().toArray(new Entry[]{});
-//        if (nextDataSet.getValue().getEntryDrafter() != null)
-//            nextDataSet.getValue().getEntryDrafter().drawPieEntrys(canvas,  new ViewportInfo(left, top, right, bottom),this.touchPXY,entryArrs);
-//
-//    }
+    private void drawPiesPoint(Canvas canvas) {
+        Entry[] entryArrs = nextDataSet.getValue().getEntries().toArray(new Entry[]{});
+        if (nextDataSet.getValue().getEntryDrafter() != null)
+            nextDataSet.getValue().getEntryDrafter().drawPieEntries(
+                    canvas,
+                    new ViewportInfo(left, top, right, bottom),
+                    this.touchPXY
+                    , entryArrs);
+
+    }
 
     /**
      * notice 绘制横向元素

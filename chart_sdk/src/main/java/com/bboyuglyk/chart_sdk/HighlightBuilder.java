@@ -8,7 +8,7 @@ import java.util.List;
 
 public class HighlightBuilder implements IHighlightBuilder{
 
-    private Paint paint;
+    protected Paint paint;
 
     public void setPaint(Paint paint) {
         this.paint = paint;
@@ -25,5 +25,19 @@ public class HighlightBuilder implements IHighlightBuilder{
     @Override
     public void drawHighlight(Canvas canvas, float px, ViewportInfo viewportInfo) {
         canvas.drawLine(px, viewportInfo.bottom, px, viewportInfo.top, paint);
+    }
+
+    @Override
+    public void drawHighlight(Canvas canvas, PXY touchP, ViewportInfo viewportInfo) {
+        if(touchP==null){
+            return;
+        }
+        float left = viewportInfo.left;
+        float right = viewportInfo.right;
+        float top = viewportInfo.top;
+        float bottom = viewportInfo.bottom;
+        float centerX=left+(right-left)/2;
+        float centerY=top+(bottom-top)/2;
+        canvas.drawLine(centerX, centerY, touchP.x, touchP.y, paint);
     }
 }

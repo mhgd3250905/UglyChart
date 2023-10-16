@@ -10,4 +10,12 @@ public interface IHighlightBuilder {
      * @param viewportInfo 图表信息
      */
     void drawHighlight(Canvas canvas,float px,ViewportInfo viewportInfo);
+
+    /**
+     * 绘制Highlight区域
+     * @param canvas
+     * @param touchP 触摸点
+     * @param viewportInfo
+     */
+    void drawHighlight(Canvas canvas,PXY touchP,ViewportInfo viewportInfo);
 }

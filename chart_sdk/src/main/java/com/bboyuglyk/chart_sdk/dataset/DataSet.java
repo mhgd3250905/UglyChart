@@ -168,31 +168,6 @@ public abstract class DataSet implements IEntryDrafter {
     public abstract float getFoundNearRange();
 
     @Override
-    public void drawPointEntry(Canvas canvas, float x, float y, float left, float top, float right, float bottom) {
-
-    }
-
-    @Override
-    public void drawRectEntry(Canvas canvas, float rLeft, float rTop, float rRight, float rBottom, float left, float top, float right, float bottom) {
-
-    }
-
-    @Override
-    public void drawLineEntry(Canvas canvas, float fromX, float fromY, float toX, float toY, float left, float top, float right, float bottom) {
-
-    }
-
-    @Override
-    public void drawComposeRect(Canvas canvas, float left, float top, float right, float bottom, float x, float maxY, float... midY) {
-
-    }
-
-    @Override
-    public void drawRangeBar(Canvas canvas, float x, float y, float left, float top, float right, float bottom, float range) {
-
-    }
-
-    @Override
     public void drawSingleEntry(Canvas canvas, int index, PXY p, ViewportInfo viewportInfo) {
 
     }
@@ -209,6 +184,11 @@ public abstract class DataSet implements IEntryDrafter {
 
     @Override
     public void drawQuatraEntry(Canvas canvas, int index, PXY p1, PXY p2, PXY p3, PXY p4, ViewportInfo viewportInfo) {
+
+    }
+
+    @Override
+    public void drawPieEntries(Canvas canvas, ViewportInfo viewportInfo, PXY touchP, Entry... entries) {
 
     }
 
