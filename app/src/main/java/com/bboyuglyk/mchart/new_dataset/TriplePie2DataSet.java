@@ -220,9 +220,9 @@ public class TriplePie2DataSet extends SingleDataSet {
             labelHeight = (labelRectHeight + padding) * strArr.length + padding;
 
             labelRect.set(
-                    (int) (20f + touchP.x),
+                    (int) (20+20f + touchP.x),
                     (int) (touchP.y - labelHeight / 2),
-                    (int) (20f + touchP.x + labelWidth + 2 * padding),
+                    (int) (20+20f + touchP.x + labelWidth + 2 * padding),
                     (int) (touchP.y + labelHeight / 2)
             );
 
@@ -235,7 +235,7 @@ public class TriplePie2DataSet extends SingleDataSet {
                 labelStr = strArr[j];
 //                    labelPaint.getTextBounds(labelStr, 0, labelStr.length(), labelRect);
                 canvas.drawText(labelStr,
-                        20f + touchP.x + padding,
+                        20+20f + touchP.x + padding,
                         labelRect.top + labelTotalHeight + labelRectHeight,
                         labelPaint);
                 labelTotalHeight += labelRectHeight + padding;
