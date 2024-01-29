@@ -47,14 +47,6 @@ To get a Git project into your build:
 
 <img src="README.assets/image-20231006111633792.png" alt="image-20231006111633792" style="zoom:67%;" />
 
-- Demo1
-
-![image-20230920203328452](README.assets/image-20230920203328452.png)
 
 
 
-
-
-- demo2
-
-![image-20230920203356459](README.assets/image-20230920203356459.png)
